@@ -1,0 +1,56 @@
+{
+  "name": "@camertron/live-component",
+  "version": "1.0.0",
+  "description": "Client-side rendering and state management for ViewComponent.",
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/live-component.umd.cjs",
+  "module": "./dist/live-component.js",
+  "exports": {
+    ".": {
+      "import": "./dist/live-component.js",
+      "require": "./dist/live-component.umd.cjs"
+    }
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "vite build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/camertron/live_component.git"
+  },
+  "keywords": [
+    "ruby",
+    "hotwire",
+    "turbo",
+    "component",
+    "components",
+    "front-end",
+    "isomorphic"
+  ],
+  "author": "Cameron C. Dutro",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/camertron/live_component/issues"
+  },
+  "homepage": "https://github.com/camertron/live_component#readme",
+  "dependencies": {
+    "idiomorph": "^0.7",
+    "inflector-js": "^2.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.1",
+    "@types/react-dom": "^19.1",
+    "terser": "^5.44.0",
+    "vite-plugin-dts": "^ 4.5.4"
+  },
+  "peerDependencies": {
+    "@hotwired/stimulus": "^3.2",
+    "@vitejs/plugin-react": "^5.0",
+    "react": "^19.1",
+    "react-dom": "^19.1"
+  }
+}
