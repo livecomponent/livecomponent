@@ -1,0 +1,15 @@
+{
+  "name": "live_component_tests",
+  "type": "module",
+  "scripts": {
+    "build": "bin/vite build"
+  },
+  "dependencies": {
+    "@hotwired/stimulus": "^3.2",
+    "@hotwired/turbo-rails": "^8.0"
+  },
+  "devDependencies": {
+    "vite": "^5.4.21",
+    "vite-plugin-ruby": "^5.1.1"
+  }
+}

@@ -10,7 +10,10 @@
   "module": "./dist/live-component.js",
   "exports": {
     ".": {
-      "import": "./dist/live-component.js",
+      "import": {
+        "development": "./index.ts",
+        "default": "./dist/live-component.js"
+      },
       "require": "./dist/live-component.umd.cjs"
     }
   },

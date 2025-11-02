@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "lib": ["es2022", "dom"],
+    "target": "es2022",
+    "baseUrl": ".",
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "module": "es2022",
+    "moduleResolution": "bundler",
+    "paths": {
+      "@camertron/live-component": ["../../../js"],
+      "app/components": ["app/components"]
+    }
+  }
+}

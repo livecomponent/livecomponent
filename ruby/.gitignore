@@ -1,0 +1,5 @@
+test/dummy/db/*.sqlite3
+test/dummy/tmp/
+test/dummy/log/
+test/dummy/node_modules
+test/dummy/public/vite*
