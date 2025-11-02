@@ -1,4 +1,3 @@
 Rails.application.routes.draw do
-  root "pages#home"
-  get "home", to: "pages#home"
+  get "components/update_props", to: "components#update_props", as: :components_update_props
 end

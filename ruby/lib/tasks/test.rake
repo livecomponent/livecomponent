@@ -3,6 +3,8 @@ namespace :test do
   task :system do
     ENV["RAILS_ENV"] = "test"
 
+    require_relative "../../test/system/test_helper"
+
     # Run all system tests
     Dir.glob("test/system/**/*_test.rb").each { |file| require_relative "../../#{file}" }
   end
