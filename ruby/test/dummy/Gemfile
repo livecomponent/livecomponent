@@ -44,6 +44,7 @@ group :test do
   gem "capybara"
   gem "cuprite", "~> 0.17"
   gem "ferrum", "~> 0.17"
+  gem "m"
 end
 
 gem "view_component", "~> 4.0"

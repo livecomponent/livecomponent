@@ -1,0 +1,6 @@
+<ul>
+  <% items.each do |item| %>
+    <li><%= item %></li>
+  <% end %>
+</ul>
+<%= button_tag "Add", type: :button, data: { action: "click->addslotcomponent#add" } %>

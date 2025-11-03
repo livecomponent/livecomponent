@@ -101,7 +101,7 @@ module LiveComponent
 
         if block
           builder = InlineSerializer::Builder.new
-          block.call(builder)
+          block.call(builder, **serializer_options)
           prop_serializers[prop_name] = builder.to_serializer
           return
         end
@@ -127,7 +127,7 @@ module LiveComponent
         {}.tap do |serialized_props|
           props.each_pair do |k, v|
             k = k.to_sym
-            serializer = prop_serializers[k] ||= LiveComponent.default_serializer
+            serializer = prop_serializers[k] ||= LiveComponent.serializer
             serialized_props[k] = serializer.serialize(v)
           end
         end
@@ -137,7 +137,7 @@ module LiveComponent
         {}.tap do |deserialized_props|
           props.each_pair do |k, v|
             k = k.to_sym
-            serializer = prop_serializers[k] ||= LiveComponent.default_serializer
+            serializer = prop_serializers[k] ||= LiveComponent.serializer
             deserialized_props[k] = serializer.deserialize(v)
           end
         end

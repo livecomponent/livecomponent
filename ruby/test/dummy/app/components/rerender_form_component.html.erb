@@ -1,0 +1,9 @@
+<% if mode == "start" %>
+  <p>Start</p>
+<% else %>
+  <p>Changed</p>
+<% end %>
+
+<%= form_with(url: components_rerender_form_submit_path, rerender: :self) do |f| %>
+  <% f.submit %>
+<% end %>

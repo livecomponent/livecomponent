@@ -1,9 +1,6 @@
 # frozen_string_literal: true
 
 module LiveComponent
-  class SafeDispatchError < StandardError
-  end
-
   class SafeDispatcher
     include Singleton
 

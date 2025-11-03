@@ -1,8 +1,39 @@
 # Add your own tasks in files placed in lib/tasks ending in .rake,
 # for example lib/tasks/capistrano.rake, and they will automatically be included in the set of available tasks.
 
-ENV["RAILS_ENV"] = "test"
+ENV["RAILS_ENV"] ||= "test"
+ENV["BUNDLE_GEMFILE"] ||= File.expand_path("Gemfile", __dir__)
 
 require_relative "test/dummy/config/application"
 
+# Load tasks but skip the test unit tasks to avoid the "rails new" help output
 Rails.application.load_tasks
+
+# Override the Rails test:system task to use our custom implementation
+Rake::Task["test:system"].clear if Rake::Task.task_defined?("test:system")
+Rake::Task["test"].clear if Rake::Task.task_defined?("test")
+
+task default: :test
+
+namespace :test do
+  task :setup do
+    $:.push(File.join(__dir__, "test"))
+
+    require "test_helper"
+    require "minitest/autorun"
+  end
+
+  desc "Run unit tests"
+  task unit: :setup do
+    # Run all system tests
+    Dir.glob("test/unit/**/*_test.rb").each { |file| require_relative file }
+  end
+
+  desc "Run system tests"
+  task system: :setup do
+    # Run all system tests
+    Dir.glob("test/system/**/*_test.rb").each { |file| require_relative file }
+  end
+end
+
+task test: ["test:unit", "test:system"]

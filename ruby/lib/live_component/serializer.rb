@@ -1,11 +1,9 @@
 # frozen_string_literal: true
 
+require "bigdecimal"
+
 module LiveComponent
-  class SerializationError < ArgumentError; end
-
-  class DefaultSerializer
-    include Singleton
-
+  class Serializer
     GLOBALID_KEY = "_lc_gid"
     SYMBOL_KEY = "_lc_sym"
     SYMBOL_KEYS_KEY = "_lc_symkeys"
@@ -22,8 +20,19 @@ module LiveComponent
 
     class << self
       def make
-        instance
+        new
       end
+    end
+
+    def initialize
+      add_serializer(BigDecimal, BigDecimalSerializer)
+      add_serializer(Date, DateSerializer)
+      add_serializer(DateTime, DateTimeSerializer)
+      add_serializer(ActiveSupport::Duration, DurationSerializer)
+      add_serializer(Module, ModuleSerializer)
+      add_serializer(Range, RangeSerializer)
+      add_serializer(Time, TimeSerializer)
+      add_serializer(ActiveSupport::TimeWithZone, TimeWithZoneSerializer)
     end
 
     def add_serializer(klass, serializer_klass)
@@ -36,9 +45,7 @@ module LiveComponent
 
     def serialize(object)
       case object
-      when nil, true, false, Integer, Float
-        object
-      when String
+      when nil, true, false, Integer, Float, String
         object
       when Symbol
         { SYMBOL_KEY => true, "value" => object.name }
@@ -68,8 +75,9 @@ module LiveComponent
         if object.respond_to?(:permitted?) && object.respond_to?(:to_h)
           serialize_indifferent_hash(object.to_h)
         elsif serializer = serializers[object.class]
-          raise SerializationError, "No serializer found for #{object.class}" unless serializer
           serializer.serialize(object)
+        else
+          raise SerializationError, "No serializer found for #{object.class}"
         end
       end
     end
@@ -89,17 +97,17 @@ module LiveComponent
           deserialize_global_id(object)
         elsif custom_serialized?(object)
           serializer_name = object[ObjectSerializer::OBJECT_SERIALIZER_KEY]
-          raise ArgumentError, "Serializer name is not present in the object: #{object.inspect}" unless serializer_name
+          raise SerializationError, "Serializer name is not present in the object: #{object.inspect}" unless serializer_name
 
           serializer = lookup_serializer(serializer_name)
-          raise ArgumentError, "Serializer #{serializer_name} is not known" unless serializer
+          raise SerializationError, "Serializer #{serializer_name} is not known" unless serializer
 
           serializer.deserialize(object)
         else
           deserialize_hash(object)
         end
       else
-        raise ArgumentError, "Can only deserialize primitive types: #{object.inspect}"
+        raise SerializationError, "Can only deserialize primitive types, got #{object.inspect}"
       end
     end
 
@@ -157,7 +165,7 @@ module LiveComponent
       when Symbol
         key.name
       else
-        raise SerializationError.new("Only string and symbol hash keys may be serialized as component props, but #{key.inspect} is a #{key.class}")
+        raise SerializationError.new("Only string and symbol hash keys are supported, but #{key.inspect} is a(n) #{key.class}")
       end
     end
 

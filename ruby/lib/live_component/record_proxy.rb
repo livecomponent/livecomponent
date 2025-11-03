@@ -3,7 +3,7 @@
 module LiveComponent
   class RecordProxy
     class << self
-      def for(gid, attributes)
+      def for(gid, attributes = {})
         proxy_mixins[gid.model_class] ||= Module.new.tap do |mod|
           mtds = (gid.model_class.column_names - ["id"]).map do |column_name|
             <<~RUBY
@@ -55,7 +55,7 @@ module LiveComponent
     end
 
     def reload
-      @record = GlobalID::Locator.locate(@gid)
+      @record = @record ? @record.reload : load
     end
 
     def id

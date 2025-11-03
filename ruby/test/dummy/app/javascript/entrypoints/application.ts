@@ -3,6 +3,7 @@ import { Application as StimulusApplication } from "@hotwired/stimulus"
 import "@hotwired/turbo-rails"
 
 import "app/components/update_props_component"
+import "app/components/add_slot_component"
 
 declare global {
   interface Window {

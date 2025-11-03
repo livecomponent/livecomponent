@@ -36,7 +36,7 @@ module LiveComponent
 
         if attributes_hash
           attributes_hash.each_pair do |k, v|
-            result[k] = LiveComponent.default_serializer.serialize(v)
+            result[k] = LiveComponent.serializer.serialize(v)
           end
         end
       end

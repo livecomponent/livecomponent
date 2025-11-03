@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2) do
+ActiveRecord::Schema[8.0].define(version: 2023_11_02_102801) do
   create_table "todo_items", force: :cascade do |t|
     t.string "text", null: false
     t.integer "todo_list_id"

@@ -14,7 +14,7 @@ module LiveComponent
         method_name = reflex["method_name"] || reflex[:method_name]
 
         props = (reflex["props"] || reflex[:props] || {}).each_with_object({}) do |(k, v), memo|
-          memo[k.to_sym] = LiveComponent.default_serializer.deserialize(v)
+          memo[k.to_sym] = LiveComponent.serializer.deserialize(v)
         end
 
         SafeDispatcher.send_safely(component, method_name, **props)

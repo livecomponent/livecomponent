@@ -136,6 +136,9 @@ GEM
     loofah (2.24.1)
       crass (~> 1.0.2)
       nokogiri (>= 1.12.0)
+    m (1.6.2)
+      method_source (>= 0.6.7)
+      rake (>= 0.9.2.2)
     mail (2.9.0)
       logger
       mini_mime (>= 0.1.1)
@@ -144,6 +147,7 @@ GEM
       net-smtp
     marcel (1.1.0)
     matrix (0.4.3)
+    method_source (1.1.0)
     mini_mime (1.1.5)
     minitest (5.26.0)
     msgpack (1.8.0)
@@ -235,11 +239,6 @@ GEM
     reline (0.6.2)
       io-console (~> 0.5)
     securerandom (0.4.1)
-    solid_cable (3.0.12)
-      actioncable (>= 7.2)
-      activejob (>= 7.2)
-      activerecord (>= 7.2)
-      railties (>= 7.2)
     sqlite3 (2.7.4-aarch64-linux-gnu)
     sqlite3 (2.7.4-aarch64-linux-musl)
     sqlite3 (2.7.4-arm-linux-gnu)
@@ -307,10 +306,10 @@ DEPENDENCIES
   jbuilder
   jsbundling-rails
   live_component!
+  m
   propshaft
   puma (>= 5.0)
   rails (~> 8.0.3)
-  solid_cable
   sqlite3 (>= 2.1)
   stimulus-rails
   turbo-rails

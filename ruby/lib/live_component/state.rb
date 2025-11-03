@@ -5,12 +5,12 @@ module LiveComponent
     class << self
       def build(definition, prop_overrides = {})
         klass = definition["ruby_class"] || definition[:ruby_class]
-        klass = LiveComponent::Utils.lookup_component_class(klass) unless klass.is_a?(Class)
+        klass = LiveComponent::Utils.lookup_component_class(klass) if klass && !klass.is_a?(Class)
         props = definition["props"] || definition[:props] || {}
 
         props.symbolize_keys!
         props.except!(*prop_overrides.keys)
-        props = klass.deserialize_props(props)
+        props = klass.deserialize_props(props) if klass
         props.merge!(prop_overrides)
 
         slots = build_slots(definition["slots"] || definition[:slots] || {}) || {}
@@ -68,18 +68,19 @@ module LiveComponent
 
     def to_h
       {
-        ruby_class: @klass.name,
-        props: klass.serialize_props(@props),
+        ruby_class: klass ? klass.name : nil,
 
-        slots: @slots.each_with_object({}) do |(k, v), h|
+        props: klass ? klass.serialize_props(props) : LiveComponent.serializer.serialize(props),
+
+        slots: slots.each_with_object({}) do |(k, v), h|
           h[k] = v.map(&:to_h)
         end,
 
-        subs: @subs.each_with_object({}) do |(k, v), h|
+        subs: subs.each_with_object({}) do |(k, v), h|
           h[k] = v.to_h
         end,
 
-        content: @content,
+        content: content,
       }
     end
 

@@ -11,8 +11,11 @@ module LiveComponent
     def lookup_component_class(const_str)
       const = const_str.safe_constantize
 
-      if const < ::ViewComponent::Base
+      if const && const < ::ViewComponent::Base
         const
+      else
+        raise UnexpectedConstantError,
+          "cannot find constant '#{const_str}' that does not inherit from ViewComponent::Base"
       end
     end
 

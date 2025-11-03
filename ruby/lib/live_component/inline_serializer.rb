@@ -5,10 +5,12 @@ module LiveComponent
     class Builder
       def serialize(&block)
         @serializer_proc = block
+        self
       end
 
       def deserialize(&block)
         @deserializer_proc = block
+        self
       end
 
       def to_serializer
