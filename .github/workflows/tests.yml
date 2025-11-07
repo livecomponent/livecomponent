@@ -1,0 +1,45 @@
+name: Tests
+on: [push]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        ruby-version: [3.3, 3.4]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Ruby ${{ matrix.ruby-version }}
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby-version }}
+          bundler-cache: true
+          working-directory: ./ruby
+      - name: Set up Ruby ${{ matrix.ruby-version }} (dummy)
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby-version }}
+          bundler-cache: true
+          working-directory: ./ruby/test/dummy
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: "npm"
+          cache-dependency-path: |
+            ./ruby/test/dummy/package-lock.json
+            ./js/package-lock.json
+      - name: Install JavaScript dependencies
+        run: |
+          cd js/
+          npm ci
+      - name: Install JavaScript dependencies (dummy)
+        run: |
+          cd ruby/test/dummy
+          npm ci
+      - name: Build assets
+        run: |
+          cd ruby/test/dummy
+          bin/vite build
+      - name: Run Tests
+        run: |
+          cd ruby/
+          bundle exec rake

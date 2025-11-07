@@ -9,6 +9,8 @@ require "rails/test_help"
 require "capybara/rails"
 require "capybara/cuprite"
 
+require_relative "./test_helpers/retry"
+
 # Load the schema for the in-memory test database
 ActiveRecord::Schema.verbose = false
 ActiveRecord::Tasks::DatabaseTasks.load_schema_current(:ruby, File.expand_path("dummy/db/schema.rb", __dir__))
