@@ -2,7 +2,6 @@
 # for example lib/tasks/capistrano.rake, and they will automatically be included in the set of available tasks.
 
 ENV["RAILS_ENV"] ||= "test"
-ENV["BUNDLE_GEMFILE"] ||= File.expand_path("Gemfile", __dir__)
 
 require_relative "test/dummy/config/application"
 

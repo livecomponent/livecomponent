@@ -1,5 +1,9 @@
 # frozen_string_literal: true
 
+# this is a gem that conditionally loads a backport of ObjectSpace::WeakKeyMap for
+# ruby 3.2 and older
+require "weak_key_map"
+
 module LiveComponent
   class SafeDispatcher
     include Singleton

@@ -13,6 +13,7 @@ Gem::Specification.new do |s|
   s.add_dependency "railties", "~> 8.0"
   s.add_dependency "view_component", "~> 4.0"
   s.add_dependency "use_context", "~> 1.2"
+  s.add_dependency "weak_key_map", "~> 1.0"
 
   s.require_path = "lib"
 
