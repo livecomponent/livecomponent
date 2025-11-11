@@ -3,9 +3,8 @@ import { Application as StimulusApplication } from "@hotwired/stimulus";
 
 import "@hotwired/turbo-rails";
 
-import "app/components/update_props_component";
-import "app/components/add_slot_component";
-import "app/components/react_component";
+// Import all .tsx and .ts files from app/components
+import.meta.glob("app/components/**/*.{ts,tsx}", { eager: true });
 
 declare global {
   interface Window {

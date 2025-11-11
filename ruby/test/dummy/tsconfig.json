@@ -8,6 +8,7 @@
     "module": "es2022",
     "moduleResolution": "bundler",
     "jsx": "react-jsx",
+    "types": ["vite/client"],
     "paths": {
       "@camertron/live-component": ["../../../js"],
       "app/components": ["app/components"]
