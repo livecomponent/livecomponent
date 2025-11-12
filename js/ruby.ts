@@ -1,24 +1,82 @@
 export type RubySymbol = {
-  value: string
+  value: string;
+  _lc_sym: true;
 }
 
-// class RubyHash {
-//   private symbol_keys: Set<string>;
+export type RecordProxy<T> = {
+  _lc_ar: {
+    gid: string;
+    signed: boolean;
+  }
+} & T
 
-//   constructor(public hash: {[key: string]: any}) {
-//     this.symbol_keys = new Set(hash["_aj_symbol_keys"] || []);
-//   }
+export type RubyGlobalID = {
+  _lc_gid: string;
+}
 
-//   get(key: string) {
-//     return this.hash[key];
-//   }
+export type RubyHash<T extends Record<string, any>> = {
+  _lc_symkeys: Array<string>;
+} & T
 
-//   set(key: string, value: any) {
-//     this.hash[key] = value;
-//     this.symbol_keys.add(key);
-//   }
+export type RubyKwargs<T extends Record<string, any>> = {
+  _lc_kwargs: Array<string>
+} & T
 
-//   to_h() {
-//     return {...this.hash, "_aj_symbol_keys": Array.from(this.symbol_keys)};
-//   }
-// }
+export type RubyHashWithIndifferentAccess<T extends Record<string, any>> = RubyHash<T> & {
+  _lc_hwia: true;
+}
+
+export const Ruby = {
+  make_symbol: (value: string): RubySymbol => {
+    return { value, _lc_sym: true };
+  },
+
+  hash_set<T extends Record<string, any>, K extends keyof T & string>(
+    hash: RubyHash<T> | RubyKwargs<T> | RubyHashWithIndifferentAccess<T>,
+    key: K,
+    value: T[K]
+  ) {
+    if ("_lc_kwargs" in hash) {
+      hash._lc_kwargs.push(key);
+    }
+
+    (hash as T)[key] = value;
+  },
+
+  hash_set_symbol<T extends Record<string, any>, K extends keyof T & string>(
+    hash: RubyHash<T> | RubyKwargs<T> | RubyHashWithIndifferentAccess<T>,
+    key: K,
+    value: T[K]
+  ) {
+    if ("_lc_kwargs" in hash) {
+      hash._lc_kwargs.push(key);
+    } else if ("_lc_symkeys" in hash) {
+      hash._lc_symkeys.push(key);
+    }
+
+    (hash as T)[key] = value;
+  },
+
+  hash_get<T extends Record<string, any>, K extends keyof T & string>(
+    hash: RubyHash<T> | RubyKwargs<T> | RubyHashWithIndifferentAccess<T>,
+    key: K
+  ) {
+    return hash[key];
+  },
+
+  hash_delete<T extends Record<string, any>, K extends keyof T & string>(
+    hash: RubyHash<T> | RubyKwargs<T> | RubyHashWithIndifferentAccess<T>,
+    key: K
+  ) {
+    if ("_lc_kwargs" in hash || "_lc_symkeys" in hash) {
+      const keys = hash._lc_kwargs || hash._lc_symkeys;
+      const index = keys.indexOf(key);
+
+      if (index > -1) {
+        keys.splice(index, 1);
+      }
+    }
+
+    delete hash[key];
+  },
+}
