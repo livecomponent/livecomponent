@@ -18,7 +18,7 @@
     }
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "vitest",
     "build": "vite build"
   },
   "repository": {
@@ -48,7 +48,8 @@
     "@types/react": "^19.1",
     "@types/react-dom": "^19.1",
     "terser": "^5.44.0",
-    "vite-plugin-dts": "^ 4.5.4"
+    "vite-plugin-dts": "^ 4.5.4",
+    "vitest": "^3.2.4"
   },
   "peerDependencies": {
     "@hotwired/stimulus": "^3.2",

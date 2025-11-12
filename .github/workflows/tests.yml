@@ -1,7 +1,8 @@
 name: Tests
 on: [push]
 jobs:
-  build:
+  ruby_tests:
+    name: "Ruby Tests"
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -43,3 +44,21 @@ jobs:
         run: |
           cd ruby/
           bundle exec rake
+  javascript_tests:
+    name: "JavaScript Tests"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: "npm"
+          cache-dependency-path: ./js/package-lock.json
+      - name: Install JavaScript dependencies
+        run: |
+          cd js/
+          npm ci
+      - name: Run Tests
+        run: |
+          cd js/
+          npm run test

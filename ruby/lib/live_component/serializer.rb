@@ -7,13 +7,13 @@ module LiveComponent
     GLOBALID_KEY = "_lc_gid"
     SYMBOL_KEY = "_lc_sym"
     SYMBOL_KEYS_KEY = "_lc_symkeys"
-    RUBY2_KEYWORDS_KEY = "_lc_kwargs"
+    SYMBOL_HASH_KEY = "_lc_symhash"
     WITH_INDIFFERENT_ACCESS_KEY = "_lc_hwia"
 
     RESERVED_KEYS = [
       GLOBALID_KEY, GLOBALID_KEY.to_sym,
       SYMBOL_KEYS_KEY, SYMBOL_KEYS_KEY.to_sym,
-      RUBY2_KEYWORDS_KEY, RUBY2_KEYWORDS_KEY.to_sym,
+      SYMBOL_HASH_KEY, SYMBOL_HASH_KEY.to_sym,
       ObjectSerializer::OBJECT_SERIALIZER_KEY, ObjectSerializer::OBJECT_SERIALIZER_KEY.to_sym,
       WITH_INDIFFERENT_ACCESS_KEY, WITH_INDIFFERENT_ACCESS_KEY.to_sym,
     ].to_set
@@ -61,15 +61,14 @@ module LiveComponent
         symbol_keys = object.keys
         symbol_keys.select! { |k| k.is_a?(Symbol) }
         symbol_keys.map!(&:name)
+        result = serialize_hash(object)
 
-        lc_hash_key = if Hash.ruby2_keywords_hash?(object)
-          RUBY2_KEYWORDS_KEY
+        if Hash.ruby2_keywords_hash?(object)
+          result[SYMBOL_HASH_KEY] = true
         else
-          SYMBOL_KEYS_KEY
+          result[SYMBOL_KEYS_KEY] = symbol_keys
         end
 
-        result = serialize_hash(object)
-        result[lc_hash_key] = symbol_keys
         result
       else
         if object.respond_to?(:permitted?) && object.respond_to?(:to_h)
@@ -145,14 +144,15 @@ module LiveComponent
 
     def deserialize_hash(serialized_hash)
       result = serialized_hash.transform_values { |v| deserialize(v) }
+
       if result.delete(WITH_INDIFFERENT_ACCESS_KEY)
         result = result.with_indifferent_access
       elsif symbol_keys = result.delete(SYMBOL_KEYS_KEY)
         result = transform_symbol_keys(result, symbol_keys)
-      elsif symbol_keys = result.delete(RUBY2_KEYWORDS_KEY)
-        result = transform_symbol_keys(result, symbol_keys)
-        result = Hash.ruby2_keywords_hash(result)
+      elsif result.delete(SYMBOL_HASH_KEY)
+        result.symbolize_keys!
       end
+
       result
     end
 

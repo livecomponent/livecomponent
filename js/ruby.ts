@@ -18,8 +18,8 @@ export type RubyHash<T extends Record<string, any>> = {
   _lc_symkeys: Array<string>;
 } & T
 
-export type RubyKwargs<T extends Record<string, any>> = {
-  _lc_kwargs: Array<string>
+export type RubySymbolHash<T extends Record<string, any>> = {
+  _lc_symhash: true
 } & T
 
 export type RubyHashWithIndifferentAccess<T extends Record<string, any>> = RubyHash<T> & {
@@ -28,29 +28,42 @@ export type RubyHashWithIndifferentAccess<T extends Record<string, any>> = RubyH
 
 export const Ruby = {
   make_symbol: (value: string): RubySymbol => {
-    return { value, _lc_sym: true };
+    return {value, _lc_sym: true};
+  },
+
+  make_hash: <T extends Record<string, any>>(): RubyHash<T> => {
+    return {_lc_symkeys: []} as RubyHash<T>;
+  },
+
+  make_symbol_hash: <T extends Record<string, any>>(): RubySymbolHash<T> => {
+    return {_lc_symhash: true} as RubySymbolHash<T>;
+  },
+
+  make_hash_with_indifferent_access: <T extends Record<string, any>>(): RubyHashWithIndifferentAccess<T> => {
+    return {_lc_symkeys: [], _lc_hwia: true} as RubyHashWithIndifferentAccess<T>;
   },
 
   hash_set<T extends Record<string, any>, K extends keyof T & string>(
-    hash: RubyHash<T> | RubyKwargs<T> | RubyHashWithIndifferentAccess<T>,
-    key: K,
+    hash: RubyHash<T> | RubySymbolHash<T> | RubyHashWithIndifferentAccess<T>,
+    key: K | RubySymbol,
     value: T[K]
   ) {
-    if ("_lc_kwargs" in hash) {
-      hash._lc_kwargs.push(key);
+    const isSymbol = typeof key === 'object' && '_lc_sym' in key;
+    const actualKey = isSymbol ? key.value : key;
+
+    if (isSymbol && "_lc_symkeys" in hash) {
+      hash._lc_symkeys.push(actualKey as K);
     }
 
-    (hash as T)[key] = value;
+    (hash as T)[actualKey as K] = value;
   },
 
   hash_set_symbol<T extends Record<string, any>, K extends keyof T & string>(
-    hash: RubyHash<T> | RubyKwargs<T> | RubyHashWithIndifferentAccess<T>,
+    hash: RubyHash<T> | RubySymbolHash<T> | RubyHashWithIndifferentAccess<T>,
     key: K,
     value: T[K]
   ) {
-    if ("_lc_kwargs" in hash) {
-      hash._lc_kwargs.push(key);
-    } else if ("_lc_symkeys" in hash) {
+    if ("_lc_symkeys" in hash) {
       hash._lc_symkeys.push(key);
     }
 
@@ -58,25 +71,35 @@ export const Ruby = {
   },
 
   hash_get<T extends Record<string, any>, K extends keyof T & string>(
-    hash: RubyHash<T> | RubyKwargs<T> | RubyHashWithIndifferentAccess<T>,
-    key: K
+    hash: RubyHash<T> | RubySymbolHash<T> | RubyHashWithIndifferentAccess<T>,
+    key: K | RubySymbol
   ) {
-    return hash[key];
+    const actualKey = typeof key === 'object' && '_lc_sym' in key ? key.value : key;
+    return hash[actualKey as K];
   },
 
   hash_delete<T extends Record<string, any>, K extends keyof T & string>(
-    hash: RubyHash<T> | RubyKwargs<T> | RubyHashWithIndifferentAccess<T>,
-    key: K
+    hash: RubyHash<T> | RubySymbolHash<T> | RubyHashWithIndifferentAccess<T>,
+    key: K | RubySymbol
   ) {
-    if ("_lc_kwargs" in hash || "_lc_symkeys" in hash) {
-      const keys = hash._lc_kwargs || hash._lc_symkeys;
-      const index = keys.indexOf(key);
+    const actualKey = typeof key === 'object' && '_lc_sym' in key ? key.value : key;
+
+    if ("_lc_symkeys" in hash) {
+      const index = hash._lc_symkeys.indexOf(actualKey);
 
       if (index > -1) {
-        keys.splice(index, 1);
+        hash._lc_symkeys.splice(index, 1);
       }
     }
 
-    delete hash[key];
+    delete hash[actualKey as K];
   },
+
+  object_to_hash<T>(object: T): RubyHash<T> {
+    return {_lc_symkeys: [], ...object};
+  },
+
+  object_to_symbol_hash<T>(object: T): RubySymbolHash<T> {
+    return {_lc_symhash: true, ...object};
+  }
 }

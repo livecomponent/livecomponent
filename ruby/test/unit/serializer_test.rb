@@ -132,7 +132,7 @@ module SerializerTests
 
     test "serializes a ruby v2+ keywords hash with symbol and string keys" do
       assert_equal(
-        { "_lc_kwargs" => ["sym_key"], "sym_key" => "sym value", "string_key" => "string value" },
+        { "_lc_symhash" => true, "sym_key" => "sym value", "string_key" => "string value" },
         serialize(Hash.ruby2_keywords_hash({ sym_key: "sym value", "string_key" => "string value" }))
       )
     end
@@ -227,15 +227,13 @@ module SerializerTests
       )
     end
 
-    test "deserializes a ruby v2+ keywords hash with symbol and string keys" do
-      result = deserialize({ "_lc_kwargs" => ["sym_key"], "sym_key" => "sym value", "string_key" => "string value" })
+    test "deserializes a symbol hash" do
+      result = deserialize({ "_lc_symhash" => true, "first_key" => "first value", "second_key" => "second value" })
 
       assert_equal(
-        { sym_key: "sym value", "string_key" => "string value" },
+        { first_key: "first value", second_key: "second value" },
         result,
       )
-
-      assert Hash.ruby2_keywords_hash?(result)
     end
 
     test "deserializes with a custom serializer" do

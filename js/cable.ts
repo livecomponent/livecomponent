@@ -1,4 +1,3 @@
-// import morphdom from "morphdom"
 import type { Consumer, Subscription } from "@rails/actioncable";
 import { RenderRequest } from ".";
 
