@@ -31,7 +31,7 @@ if (!window.crypto?.randomUUID) {
 }
 
 export class LiveRenderChannel {
-  private pendingRequests: Map<string, [number, (value: string) => void, () => void]> = new Map();
+  private pendingRequests: Map<string, [(value: string) => void, () => void]> = new Map();
   private consumer: Consumer;
   private subscription: Promise<Subscription>;
 
@@ -52,11 +52,7 @@ export class LiveRenderChannel {
 
           received(data) {
             if (channel.pendingRequests.has(data.request_id)) {
-              const [startTime, resolveRequest] = channel.pendingRequests.get(data.request_id)!
-              const endTime = Date.now();
-              const elapsedMs = endTime - startTime;
-              // eslint-disable-next-line no-console
-              console.log(`Request ${data.request_id} took ${elapsedMs}ms`);
+              const [resolveRequest] = channel.pendingRequests.get(data.request_id)!
               channel.pendingRequests.delete(data.request_id);
               resolveRequest(data.payload);
             }
@@ -71,7 +67,7 @@ export class LiveRenderChannel {
     const requestId = window.crypto.randomUUID();
 
     const promise = new Promise<string>((resolve, reject) => {
-      this.pendingRequests.set(requestId, [Date.now(), resolve, reject]);
+      this.pendingRequests.set(requestId, [resolve, reject]);
     });
 
     subscription.send({payload: JSON.stringify(request), request_id: requestId});

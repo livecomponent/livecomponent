@@ -86,6 +86,10 @@ export class Application {
       return this.application;
     }
 
+    if (!this.resolve_application) {
+      Application.instance;
+    }
+
     transport ||= new HTTPTransport();
     transport.start();
 

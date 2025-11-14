@@ -5,6 +5,7 @@ import { LiveComponent, RenderRequest, State } from "./live-component";
 import { LiveController } from "./live-controller";
 
 // Define ComponentType locally to avoid circular import with react
+/* @ts-ignore */
 type ComponentType<P = {}> = React.ComponentType<P>;
 
 export class ReactRegistry {

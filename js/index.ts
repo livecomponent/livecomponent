@@ -4,6 +4,6 @@ export * from "./http-transport";
 export * from "./live";
 export * from "./live-component";
 export * from "./live-controller";
-export * from "./react";
+export * from "./live-react";
 export * from "./ruby";
 export * from "./websockets-transport";

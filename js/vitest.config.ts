@@ -1,8 +1,13 @@
 import { defineConfig } from "vitest/config";
 
 export default defineConfig({
+  resolve: {
+    alias: {
+    },
+  },
   test: {
     globals: true,
-    environment: "node",
+    environment: "happy-dom",
+    setupFiles: ["./vitest.setup.ts"],
   },
 });

@@ -1,4 +1,4 @@
-import { Ruby } from "ruby";
+import { Ruby } from "./ruby";
 import { describe, it, expect } from "vitest";
 
 describe("Ruby", () => {

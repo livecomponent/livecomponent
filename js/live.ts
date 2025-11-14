@@ -34,7 +34,7 @@ function properties_for_target(target_name: string) {
       get(this: LiveController | null): LiveController | null {
         if (!this) return null;
 
-        const element = this.targets.find(target_name);
+        const element = this.element.querySelector(`[data-${this.identifier}-target="${target_name}"]`)
         if (!element) return null;
 
         return (element.closest("[data-livecomponent]:not([data-controller=livereact])") as LiveComponent)?._controller || null;

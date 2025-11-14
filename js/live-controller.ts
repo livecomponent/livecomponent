@@ -1,7 +1,6 @@
 import { Controller } from "@hotwired/stimulus";
 import { live } from "./live";
 import { LiveComponent, Props, RenderRequest, State } from "./live-component";
-import { singularize } from "inflector-js";
 import { ComponentBuilder } from "./component-builder";
 import { Constructor } from "./constructor";
 import { AsyncTaskQueue } from "./queue";
@@ -62,11 +61,6 @@ export class LiveController<P extends Props = Props> extends Controller {
 
   get id(): string {
     return this.element.getAttribute("data-id");
-  }
-
-  get<T extends State = State>(slot_name: string): T[] {
-    const singular_name = singularize(slot_name, null);
-    return (this.state.slots[singular_name] || []) as T[];
   }
 
   initialize() {

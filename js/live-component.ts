@@ -50,7 +50,7 @@ export class LiveComponent<P extends Props = Props> extends HTMLElement {
 
   get parent(): LiveComponent | null {
     const parent_el = this.parentElement;
-    return parent_el?.closest("[data-livecomponent");
+    return parent_el?.closest("[data-livecomponent]");
   }
 
   async render(request: RenderRequest) {

@@ -41,14 +41,17 @@
   },
   "homepage": "https://github.com/camertron/live_component#readme",
   "dependencies": {
-    "idiomorph": "^0.7",
-    "inflector-js": "^2.0"
+    "idiomorph": "^0.7"
   },
   "devDependencies": {
     "@types/react": "^19.1",
     "@types/react-dom": "^19.1",
+    "happy-dom": "^20.0.10",
+    "@hotwired/stimulus": "^3.2.2",
+    "@hotwired/turbo": "^8.0.20",
+    "@rails/actioncable": "^8.1.100",
     "terser": "^5.44.0",
-    "vite-plugin-dts": "^ 4.5.4",
+    "vite-plugin-dts": "^4.5.4",
     "vitest": "^3.2.4"
   },
   "peerDependencies": {
