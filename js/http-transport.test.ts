@@ -39,7 +39,7 @@ describe("HTTPTransport", () => {
         state: {
           props: { foo: "bar" },
           slots: {},
-          subs: {},
+          children: {},
         },
         reflexes: [],
       };

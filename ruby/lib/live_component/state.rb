@@ -14,13 +14,13 @@ module LiveComponent
         props.merge!(prop_overrides)
 
         slots = build_slots(definition["slots"] || definition[:slots] || {}) || {}
-        subs = build_subs(definition["subs"] || definition[:subs] || {}) || {}
+        children = build_children(definition["children"] || definition[:children] || {}) || {}
 
         State.new(
           klass: klass,
           props: props,
           slots: slots,
-          subs: subs,
+          children: children,
           content: definition["content"] || definition[:content]
         )
       end
@@ -39,26 +39,26 @@ module LiveComponent
         end
       end
 
-      def build_subs(sub_map)
-        return unless sub_map
+      def build_children(child_map)
+        return unless child_map
 
-        sub_map.each_with_object({}) do |(sub_id, sub_entry), memo|
-          memo[sub_id] = build(sub_entry)
+        child_map.each_with_object({}) do |(child_id, child_entry), memo|
+          memo[child_id] = build(child_entry)
         end
       end
     end
 
-    attr_reader :root, :klass, :props, :slots, :subs
+    attr_reader :root, :klass, :props, :slots, :children
     attr_accessor :content
 
     alias root? root
 
-    def initialize(root: false, klass: nil, props: {}, slots: {}, subs: {}, content: nil)
+    def initialize(root: false, klass: nil, props: {}, slots: {}, children: {}, content: nil)
       @root = root
       @klass = klass
       @props = props
       @slots = slots
-      @subs = subs
+      @children = children
       @content = content
     end
 
@@ -76,7 +76,7 @@ module LiveComponent
           h[k] = v.map(&:to_h)
         end,
 
-        subs: subs.each_with_object({}) do |(k, v), h|
+        children: children.each_with_object({}) do |(k, v), h|
           h[k] = v.to_h
         end,
 

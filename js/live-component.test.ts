@@ -42,8 +42,8 @@ describe("LiveComponent", () => {
     it("propagates state to child components", async () => {
       const state = testContext.make_state();
       state.props.parent_prop = "parent prop value";
-      state.subs["abc123"] = testContext.make_state();
-      state.subs["abc123"].props = { child_prop: "child prop value" };
+      state.children["abc123"] = testContext.make_state();
+      state.children["abc123"].props = { child_prop: "child prop value" };
 
       const component = await testContext.make_component(state, () => {
         const child = testContext.make_component_element();
@@ -52,7 +52,7 @@ describe("LiveComponent", () => {
       });
 
       expect(component.state.props).toStrictEqual({parent_prop: "parent prop value"});
-      expect(component.state.subs["abc123"].props).toStrictEqual({child_prop: "child prop value"});
+      expect(component.state.children["abc123"].props).toStrictEqual({child_prop: "child prop value"});
     });
 
     it("calls before_node_morphed before the node is replaced", async () => {

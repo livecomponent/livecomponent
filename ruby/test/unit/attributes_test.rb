@@ -81,7 +81,7 @@ class AttributesTest < TestCase
 
     state_json = page.find_all("[data-livecomponent]").first["data-state"]
     state = LiveComponent::State.build(JSON.parse(state_json))
-    children = state.subs.values
+    children = state.children.values
 
     assert_equal 1, children.size
     assert_equal ParentComponent::ChildComponent, children[0].klass

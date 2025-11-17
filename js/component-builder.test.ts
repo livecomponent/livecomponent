@@ -26,7 +26,7 @@ describe("ComponentBuilder", () => {
     it("defaults to an empty children object", () => {
       const builder = new ComponentBuilder(TestContext.make_state());
       builder.with("item");
-      expect(builder.state.slots["item"][0].subs).toStrictEqual({});
+      expect(builder.state.slots["item"][0].children).toStrictEqual({});
     });
 
     it("allows a block as the second argument", () => {

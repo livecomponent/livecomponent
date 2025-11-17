@@ -17,7 +17,7 @@ export type State<P extends Props = Props> = {
   slots: {
     [key: string]: State[]
   }
-  subs: {
+  children: {
     [key: string]: State
   }
 }

@@ -77,7 +77,7 @@ describe("LiveComponentReact", () => {
           message: "Hello, React!"
         },
         slots: {},
-        subs: {}
+        children: {}
       };
 
       const request: RenderRequest = {
@@ -110,7 +110,7 @@ describe("LiveComponentReact", () => {
         state: {
           props: { component: "Counter", count: 1 },
           slots: {},
-          subs: {}
+          children: {}
         },
         reflexes: []
       };
@@ -122,7 +122,7 @@ describe("LiveComponentReact", () => {
         state: {
           props: { component: "Counter", count: 2 },
           slots: {},
-          subs: {}
+          children: {}
         },
         reflexes: []
       };

@@ -22,7 +22,7 @@ describe("LiveController", () => {
   describe("find_sub", () => {
     it("yields all children to the block", async () => {
       const state = testContext.make_state();
-      state.subs["abc123"] = testContext.make_state();
+      state.children["abc123"] = testContext.make_state();
 
       const component = await testContext.make_component(state, () => {
         const child = testContext.make_component_element();
@@ -31,21 +31,21 @@ describe("LiveController", () => {
       });
 
       const controller = await component.controller;
-      const yielded_subs = [];
+      const yielded_children = [];
 
-      controller.find_sub((sub: State) => {
-        yielded_subs.push(sub);
+      controller.find_child((sub: State) => {
+        yielded_children.push(sub);
         return false;
       });
 
-      expect(yielded_subs).toStrictEqual([
-        state.subs["abc123"]
+      expect(yielded_children).toStrictEqual([
+        state.children["abc123"]
       ]);
     });
 
     it("returns the matching sub", async () => {
       const state = testContext.make_state();
-      state.subs["abc123"] = testContext.make_state();
+      state.children["abc123"] = testContext.make_state();
 
       const component = await testContext.make_component(state, () => {
         const child = testContext.make_component_element();
@@ -54,16 +54,16 @@ describe("LiveController", () => {
       });
 
       const controller = await component.controller;
-      const sub = controller.find_sub(() => true);
+      const sub = controller.find_child(() => true);
 
-      expect(sub).toStrictEqual(["abc123", state.subs["abc123"]]);
+      expect(sub).toStrictEqual(["abc123", state.children["abc123"]]);
     });
   });
 
   describe("find_sub_by_id", () => {
     it("finds the sub by it's id", async () => {
       const state = testContext.make_state();
-      state.subs["abc123"] = testContext.make_state();
+      state.children["abc123"] = testContext.make_state();
 
       const component = await testContext.make_component(state, () => {
         const child = testContext.make_component_element();
@@ -73,8 +73,8 @@ describe("LiveController", () => {
 
       const controller = await component.controller;
 
-      const sub = controller.find_sub_by_id("abc123");
-      expect(sub).toStrictEqual(state.subs["abc123"]);
+      const sub = controller.find_child_by_id("abc123");
+      expect(sub).toStrictEqual(state.children["abc123"]);
     });
   });
 

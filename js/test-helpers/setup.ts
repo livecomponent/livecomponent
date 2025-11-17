@@ -16,7 +16,7 @@ export class TestContext {
   }
 
   static make_state(): State {
-    return {props: {}, slots: {}, subs: {}};
+    return {props: {}, slots: {}, children: {}};
   }
 
   make_state(): State {
@@ -28,7 +28,7 @@ export class TestContext {
       state: {
         props: {},
         slots: {},
-        subs: {},
+        children: {},
       },
       reflexes: [],
     };

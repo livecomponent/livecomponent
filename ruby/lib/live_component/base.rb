@@ -209,7 +209,7 @@ module LiveComponent
           klass: self.class,
           props: props,
           slots: @__lc[:slots] || {},
-          subs: @__lc[:subs] || {},
+          children: @__lc[:children] || {},
         )
 
         result = UseContext.use_context(:__lc_context, :state) do |parent_state|
@@ -222,7 +222,7 @@ module LiveComponent
               parent_state.slots[@__lc_slot_name] ||= []
               parent_state.slots[@__lc_slot_name] << current_state
             else
-              parent_state.subs[__lc_id] = current_state
+              parent_state.children[__lc_id] = current_state
             end
           end
 

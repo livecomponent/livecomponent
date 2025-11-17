@@ -33,7 +33,7 @@ export class ComponentBuilder<S extends State = State, P extends Props = S exten
     const state: State = {
       props: props,
       slots: {},
-      subs: {},
+      children: {},
     };
 
     if (block) {

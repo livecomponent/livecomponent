@@ -15,7 +15,7 @@ module StateTests
       state = State.build({})
       assert_equal({}, state.props)
       assert_equal({}, state.slots)
-      assert_equal({}, state.subs)
+      assert_equal({}, state.children)
       assert_nil state.content
     end
 
@@ -102,7 +102,7 @@ module StateTests
             content: "Item 1",
             props: { "_lc_symkeys" => [] },
             slots: {},
-            subs: {},
+            children: {},
           }]
         },
         state_hash[:slots]
@@ -113,7 +113,7 @@ module StateTests
       state_hash =
         State.build({
           ruby_class: ParentComponent,
-          subs: {
+          children: {
             "abc123" => {
               ruby_class: ParentComponent::ChildComponent,
             }
@@ -128,10 +128,10 @@ module StateTests
             content: nil,
             props: {},
             slots: {},
-            subs: {},
+            children: {},
           }
         },
-        state_hash[:subs]
+        state_hash[:children]
       )
     end
   end
@@ -140,7 +140,7 @@ module StateTests
     test "converts to json" do
       state = State.build({ ruby_class: "HelloWorldComponent" })
       assert_equal(
-        "{\"ruby_class\":\"HelloWorldComponent\",\"props\":{},\"slots\":{},\"subs\":{},\"content\":null}",
+        "{\"ruby_class\":\"HelloWorldComponent\",\"props\":{},\"slots\":{},\"children\":{},\"content\":null}",
         state.to_json
       )
     end

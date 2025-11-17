@@ -68,7 +68,7 @@ describe("WebSocketsTransport", () => {
         state: {
           props: { foo: "bar" },
           slots: {},
-          subs: {},
+          children: {},
         },
         reflexes: [],
       };
@@ -119,12 +119,12 @@ describe("WebSocketsTransport", () => {
 
     it("handles multiple concurrent requests", async () => {
       const request1: RenderRequest = {
-        state: { props: { id: 1 }, slots: {}, subs: {} },
+        state: { props: { id: 1 }, slots: {}, children: {} },
         reflexes: [],
       };
 
       const request2: RenderRequest = {
-        state: { props: { id: 2 }, slots: {}, subs: {} },
+        state: { props: { id: 2 }, slots: {}, children: {} },
         reflexes: [],
       };
 

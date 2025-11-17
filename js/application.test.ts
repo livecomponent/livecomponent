@@ -21,7 +21,7 @@ describe("Application", () => {
 
       // Create a Turbo Stream response with the updated component HTML
       const updatedComponentHTML = `
-        <live-component data-livecomponent="true" data-state='{"props":{},"slots":{},"subs":{}}'>
+        <live-component data-livecomponent="true" data-state='{"props":{},"slots":{},"children":{}}'>
           <form action="/submit_path" method="post" data-rerender-target=":self" data-turbo="true">
             <p>Updated</p>
             <input type="submit" name="Submit" />

@@ -37,23 +37,23 @@ export class LiveController<P extends Props = Props> extends Controller {
     return this._task_queue;
   }
 
-  find_sub<T extends Props = Props>(cb: (state: State) => boolean): [string, State<T>] | null {
-    for (const id in this.state.subs) {
-      if (cb(this.state.subs[id])) {
-        return [id, this.state.subs[id] as State<T>];
+  find_child<T extends Props = Props>(cb: (state: State) => boolean): [string, State<T>] | null {
+    for (const id in this.state.children) {
+      if (cb(this.state.children[id])) {
+        return [id, this.state.children[id] as State<T>];
       }
     }
 
     return null;
   }
 
-  find_sub_by_id<T extends State = State>(id: string, state: State = this.state): T | null {
-    const sub = state.subs[id];
-    if (sub) return sub as T;
+  find_child_by_id<T extends State = State>(id: string, state: State = this.state): T | null {
+    const child = state.children[id];
+    if (child) return child as T;
 
-    for (const sub_id in state.subs) {
-      const sub = this.find_sub_by_id(id, state.subs[sub_id]);
-      if (sub) return sub as T;
+    for (const child_id in state.children) {
+      const child = this.find_child_by_id(id, state.children[child_id]);
+      if (child) return child as T;
     }
 
     return null;
@@ -118,13 +118,13 @@ export class LiveController<P extends Props = Props> extends Controller {
       }
     }
 
-    for (const sub_id in this.state.subs) {
-      const sub = this.state.subs[sub_id];
-      const sub_element = this.element.querySelector(`[data-id="${sub_id}"]`) as LiveComponent;
+    for (const child_id in this.state.children) {
+      const child = this.state.children[child_id];
+      const child_element = this.element.querySelector(`[data-id="${child_id}"]`) as LiveComponent;
 
-      if (sub_element) {
-        const sub_controller = await sub_element.controller;
-        await sub_controller.propagate_state(sub);
+      if (child_element) {
+        const child_controller = await child_element.controller;
+        await child_controller.propagate_state(child);
       }
     }
 
