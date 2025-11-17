@@ -104,9 +104,24 @@ module UtilsTests
 
     test "returns a rerender target for the given component class" do
       assert_equal(
-        { "data-rerender-target" => "testcomponent" },
+        { "data-rerender-target" => "UtilsTests::HtmlParamsForRenderTest::TestComponent" },
         LiveComponent::Utils.html_params_for_rerender(TestComponent)
       )
+    end
+
+    test "if given a symbol, attempts to look up the component class" do
+      assert_equal(
+        { "data-rerender-target" => "UtilsTests::HtmlParamsForRenderTest::TestComponent" },
+        LiveComponent::Utils.html_params_for_rerender(:"UtilsTests::HtmlParamsForRenderTest::TestComponent")
+      )
+    end
+
+    test "raises an error if the given symbol does not correspond to a component class" do
+      error = assert_raises(LiveComponent::UnexpectedConstantError) do
+        LiveComponent::Utils.html_params_for_rerender(:Foo)
+      end
+
+      assert_equal "cannot find constant 'Foo' to use as a rerender target", error.message
     end
 
     test "returns a rerender target for the given component" do

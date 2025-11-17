@@ -248,6 +248,7 @@ module LiveComponent
           "data-id" => __lc_id,
           "data-controller" => __lc_controller,
           "data-livecomponent" => "true",
+          "data-component" => self.class.name,
           **@__lc_attributes,
         }
 

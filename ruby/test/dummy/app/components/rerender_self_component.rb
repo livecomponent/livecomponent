@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class RerenderFormComponent < ViewComponent::Base
+class RerenderSelfComponent < ViewComponent::Base
   include LiveComponent::Base
 
   attr_reader :mode

@@ -9,13 +9,18 @@ module LiveComponent
     end
 
     def lookup_component_class(const_str)
+      const = safe_lookup_component_class(const_str)
+      return const if const
+
+      raise UnexpectedConstantError,
+        "cannot find constant '#{const_str}' that does not inherit from ViewComponent::Base"
+    end
+
+    def safe_lookup_component_class(const_str)
       const = const_str.safe_constantize
 
       if const && const < ::ViewComponent::Base
         const
-      else
-        raise UnexpectedConstantError,
-          "cannot find constant '#{const_str}' that does not inherit from ViewComponent::Base"
       end
     end
 
@@ -23,11 +28,16 @@ module LiveComponent
       case object
       when :self, :parent
         return { "data-rerender-target" => ":#{object}" }
+      when Symbol
+        const = safe_lookup_component_class(object.to_s)
+        return({ "data-rerender-target" => const.name }) if const
+
+        raise UnexpectedConstantError, "cannot find constant '#{object}' to use as a rerender target"
       when String
         return { "data-rerender-id" => object }
       when Class
         if object < LiveComponent::Base
-          return { "data-rerender-target" => object.__lc_controller }
+          return { "data-rerender-target" => object.name }
         end
       else
         if object.respond_to?(:__lc_id)

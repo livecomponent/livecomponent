@@ -1,9 +1,14 @@
 import { vi, beforeEach, afterEach } from "vitest";
 
-// Setup global fetch mock
+// Setup global fetch mock BEFORE importing Turbo
+// This ensures Turbo uses our mocked fetch
+global.fetch = vi.fn();
+
+import "@hotwired/turbo";
+
 beforeEach(() => {
-  // Create a mock fetch function that can be customized per test
-  global.fetch = vi.fn();
+  // Reset the mock before each test
+  vi.mocked(global.fetch).mockReset();
 });
 
 afterEach(() => {

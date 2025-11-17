@@ -24,3 +24,26 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
     headless: !ENV["SHOW_BROWSER"]
   }
 end
+
+# Ensure browser cleanup happens when tests finish, regardless of test runner (m, rake, etc.)
+Minitest.after_run do
+  begin
+    # Get the current driver and quit the browser before resetting sessions
+    if Capybara.current_session.driver.respond_to?(:browser)
+      browser = Capybara.current_session.driver.browser
+      browser.quit if browser.respond_to?(:quit)
+    end
+
+    # Reset all Capybara sessions
+    Capybara.reset_sessions!
+  rescue StandardError => e
+    # Ignore errors during cleanup
+    puts "Warning: Error during browser cleanup: #{e.message}"
+  end
+end
+
+# clear old vite test build
+ViteRuby.commands.clobber
+
+# remove compiled javascript files to prevent vite from including a stale build
+FileUtils.rm_rf(File.expand_path(File.join(__dir__, "..", "..", "js", "dist")))
