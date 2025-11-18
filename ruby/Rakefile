@@ -3,6 +3,9 @@
 
 ENV["RAILS_ENV"] ||= "test"
 
+require "rubygems/package_task"
+Bundler::GemHelper.install_tasks
+
 require_relative "test/dummy/config/application"
 
 # Load tasks but skip the test unit tasks to avoid the "rails new" help output
