@@ -11,6 +11,8 @@ module LiveComponent
         html.merge!(params)
       end
 
+      options = ::LiveComponent::Utils.translate_all_attrs(options)
+
       super(**options, html: html, &block)
     end
 
@@ -19,7 +21,20 @@ module LiveComponent
         form.merge!(params)
       end
 
+      options = ::LiveComponent::Utils.translate_all_attrs(options)
+
       super(*args, **options, form: form, &block)
+    end
+
+    def content_tag(name, content_or_options_with_block = nil, options = nil, escape = true, &block)
+      if block_given?
+        options = content_or_options_with_block if content_or_options_with_block.is_a?(Hash)
+      end
+
+      options ||= {}
+      options = ::LiveComponent::Utils.translate_all_attrs(options)
+
+      super
     end
   end
 end
