@@ -7,4 +7,5 @@ Rails.application.routes.draw do
   get "components/rerender_id", to: "components#rerender_id", as: :components_rerender_id
   post "components/rerender_form_submit", to: "components#rerender_form_submit", as: :components_rerender_form_submit
   get "components/react", to: "components#react", as: :components_react
+  get "components/reflex", to: "components#reflex", as: :components_reflex
 end

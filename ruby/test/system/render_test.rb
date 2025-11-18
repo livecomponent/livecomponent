@@ -59,4 +59,14 @@ class RenderTest < ApplicationSystemTestCase
 
     assert_selector "p", text: "Changed"
   end
+
+  test "allows calling methods on components, i.e. allows reflexes" do
+    visit components_reflex_path
+
+    assert_selector "p", text: "Start"
+
+    click_button "Change"
+
+    assert_selector "p", text: "Changed"
+  end
 end

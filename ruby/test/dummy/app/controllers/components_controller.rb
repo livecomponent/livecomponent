@@ -19,4 +19,7 @@ class ComponentsController < ApplicationController
 
   def rerender_form_submit
   end
+
+  def reflex
+  end
 end
