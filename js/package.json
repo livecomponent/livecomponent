@@ -25,6 +25,9 @@
     "type": "git",
     "url": "git+https://github.com/livecomponent/livecomponent.git"
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "keywords": [
     "ruby",
     "hotwire",
