@@ -17,5 +17,5 @@ Gem::Specification.new do |s|
 
   s.require_path = "lib"
 
-  s.files = Dir["{app,config,lib,ext,spec}/**/*", "Gemfile", "LICENSE", "CHANGELOG.md", "README.md", "Rakefile", "live_component.gemspec"]
+  s.files = Dir["{app,config,ext,lib}/**/*", "Gemfile", "LICENSE", "CHANGELOG.md", "README.md", "Rakefile", "live_component.gemspec"]
 end
