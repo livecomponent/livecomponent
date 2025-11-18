@@ -5,7 +5,8 @@ module Minitest
   module Retry
     RETRY_MAX = 3
     ERRORS = [
-      Ferrum::TimeoutError
+      Ferrum::TimeoutError,
+      Ferrum::ProcessTimeoutError,
     ].freeze
 
     module ClassMethods
