@@ -23,7 +23,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/camertron/live_component.git"
+    "url": "git+https://github.com/livecomponent/livecomponent.git"
   },
   "keywords": [
     "ruby",
@@ -37,9 +37,9 @@
   "author": "Cameron C. Dutro",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/camertron/live_component/issues"
+    "url": "https://github.com/livecomponent/livecomponent/issues"
   },
-  "homepage": "https://github.com/camertron/live_component#readme",
+  "homepage": "https://github.com/livecomponent/livecomponent#readme",
   "dependencies": {
     "idiomorph": "^0.7"
   },

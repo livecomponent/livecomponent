@@ -6,7 +6,7 @@ Gem::Specification.new do |s|
   s.version  = ::LiveComponent::VERSION
   s.authors  = ["Cameron Dutro"]
   s.email    = ["camertron@gmail.com"]
-  s.homepage = "http://github.com/camertron/live_component"
+  s.homepage = "http://github.com/livecomponent/livecomponent"
   s.description = s.summary = "Client-side rendering and state management for ViewComponent."
   s.platform = Gem::Platform::RUBY
 
