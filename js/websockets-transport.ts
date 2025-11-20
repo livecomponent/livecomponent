@@ -2,7 +2,7 @@ import { Consumer } from "@rails/actioncable";
 import { Transport } from "./application";
 import { LiveRenderChannel } from "./cable";
 import { RenderRequest } from "./live-component";
-import { encode_request } from "./payload";
+import { decode, encode_request } from "./payload";
 
 export class WebSocketsTransport implements Transport {
   public channel: LiveRenderChannel;
@@ -19,6 +19,6 @@ export class WebSocketsTransport implements Transport {
 
   async render(request: RenderRequest): Promise<string> {
     const payload = await encode_request(request);
-    return this.channel.render(payload, this.debug);
+    return decode(await this.channel.render(payload, this.debug));
   }
 }

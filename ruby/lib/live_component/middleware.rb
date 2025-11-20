@@ -20,6 +20,8 @@ module LiveComponent
           :show, assigns: { state: payload["state"], reflexes: payload["reflexes"] }, layout: false
         )
 
+        result = LiveComponent::Payload.encode(result)
+
         return [200, { "Content-Type" => "text/html" }, [result]]
       end
 

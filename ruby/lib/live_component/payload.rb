@@ -15,6 +15,10 @@ module LiveComponent
         JSON.parse(data)
       end
 
+      def encode(data)
+        Base64.encode64(Zlib.gzip(data))
+      end
+
       private
 
       def gzipped?(data)

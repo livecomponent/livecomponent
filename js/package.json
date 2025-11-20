@@ -1,6 +1,6 @@
 {
   "name": "@camertron/live-component",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Client-side rendering and state management for ViewComponent.",
   "type": "module",
   "files": [
@@ -13,7 +13,6 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": {
-        "development": "./index.ts",
         "default": "./dist/live-component.js"
       },
       "require": "./dist/live-component.umd.cjs"

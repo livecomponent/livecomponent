@@ -17,6 +17,8 @@ class LiveComponentChannel < ActionCable::Channel::Base
       :show, assigns: { state: payload["state"], reflexes: payload["reflexes"] }, layout: false
     )
 
+    result = LiveComponent::Payload.encode(result)
+
     ActionCable.server.broadcast(
       "live_component",
       { payload: result, request_id: request_id }

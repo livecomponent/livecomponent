@@ -1,4 +1,4 @@
-import { encode_request } from "./payload";
+import { decode, encode_request } from "./payload";
 import { Transport } from "./application";
 import { RenderRequest } from "./live-component";
 
@@ -23,6 +23,8 @@ export class HTTPTransport implements Transport {
         "Accept": "text/html"
       },
       body: JSON.stringify({payload})
-    }).then(response => response.text());
+    })
+    .then(response => response.text())
+    .then(response => decode(response))
   }
 }
