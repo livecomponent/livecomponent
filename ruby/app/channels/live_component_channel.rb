@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 require "json"
+require "base64"
+require "zlib"
 
 class LiveComponentChannel < ActionCable::Channel::Base
   def subscribed
@@ -9,7 +11,7 @@ class LiveComponentChannel < ActionCable::Channel::Base
 
   def receive(data)
     request_id = data["request_id"]
-    payload = JSON.parse(data["payload"])
+    payload = LiveComponent::Payload.decode(data["payload"])
 
     result = LiveComponent::RenderController.renderer.render(
       :show, assigns: { state: payload["state"], reflexes: payload["reflexes"] }, layout: false

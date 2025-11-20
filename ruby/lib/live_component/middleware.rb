@@ -1,5 +1,9 @@
 # frozen_string_literal: true
 
+require "json"
+require "base64"
+require "zlib"
+
 module LiveComponent
   class Middleware
     def initialize(app)
@@ -10,7 +14,7 @@ module LiveComponent
       if env["PATH_INFO"] == "/live_component/render"
         raw_data = env["rack.input"].read
         data = JSON.parse(raw_data)
-        payload = JSON.parse(data["payload"])
+        payload = LiveComponent::Payload.decode(data["payload"])
 
         result = LiveComponent::RenderController.renderer.render(
           :show, assigns: { state: payload["state"], reflexes: payload["reflexes"] }, layout: false

@@ -1,5 +1,4 @@
 import type { Consumer, Subscription } from "@rails/actioncable";
-import { RenderRequest } from ".";
 
 if (!window.crypto?.randomUUID) {
   /* @ts-ignore */
@@ -30,7 +29,7 @@ if (!window.crypto?.randomUUID) {
 }
 
 export class LiveRenderChannel {
-  private pendingRequests: Map<string, [(value: string) => void, () => void]> = new Map();
+  private pendingRequests: Map<string, [number | null, (value: string) => void, () => void]> = new Map();
   private consumer: Consumer;
   private subscription: Promise<Subscription>;
 
@@ -51,7 +50,14 @@ export class LiveRenderChannel {
 
           received(data) {
             if (channel.pendingRequests.has(data.request_id)) {
-              const [resolveRequest] = channel.pendingRequests.get(data.request_id)!
+              const [startTime, resolveRequest] = channel.pendingRequests.get(data.request_id)!
+
+              if (startTime) {
+                const endTime = Date.now();
+                const elapsed_ms = endTime - startTime;
+                console.log(`Request ${data.request_id} took ${elapsed_ms}ms`);
+              }
+
               channel.pendingRequests.delete(data.request_id);
               resolveRequest(data.payload);
             }
@@ -61,15 +67,15 @@ export class LiveRenderChannel {
     });
   }
 
-  async render(request: RenderRequest): Promise<string> {
+  async render(payload: string, debug: boolean = false): Promise<string> {
     const subscription = await this.subscription;
     const requestId = window.crypto.randomUUID();
 
     const promise = new Promise<string>((resolve, reject) => {
-      this.pendingRequests.set(requestId, [resolve, reject]);
+      this.pendingRequests.set(requestId, [debug ? Date.now() : null, resolve, reject]);
     });
 
-    subscription.send({payload: JSON.stringify(request), request_id: requestId});
+    subscription.send({payload, request_id: requestId});
     return promise;
   }
 }

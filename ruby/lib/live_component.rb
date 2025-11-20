@@ -13,6 +13,7 @@ module LiveComponent
   autoload :ModelSerializer,        "live_component/model_serializer"
   autoload :ModuleSerializer,       "live_component/module_serializer"
   autoload :ObjectSerializer,       "live_component/object_serializer"
+  autoload :Payload,                "live_component/payload"
   autoload :RangeSerializer,        "live_component/range_serializer"
   autoload :RecordProxy,            "live_component/record_proxy"
   autoload :SafeDispatcher,         "live_component/safe_dispatcher"
