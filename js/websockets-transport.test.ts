@@ -2,38 +2,39 @@ import { WebSocketsTransport } from "./websockets-transport";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { RenderRequest } from "./live-component";
 import type { Consumer, Subscription } from "@rails/actioncable";
+import { encode, encode_request } from "./payload";
 
 describe("WebSocketsTransport", () => {
   let transport: WebSocketsTransport;
-  let mockConsumer: Consumer;
-  let mockSubscription: Subscription;
-  let connectedCallback: (() => void) | null = null;
-  let receivedCallback: ((data: any) => void) | null = null;
+  let mock_consumer: Consumer;
+  let mock_subscription: Subscription;
+  let connected_callback: (() => void) | null = null;
+  let received_callback: ((data: any) => void) | null = null;
 
   beforeEach(() => {
-    connectedCallback = null;
-    receivedCallback = null;
+    connected_callback = null;
+    received_callback = null;
 
     // Create a mock subscription
-    mockSubscription = {
+    mock_subscription = {
       send: vi.fn(),
       unsubscribe: vi.fn(),
       perform: vi.fn(),
     } as unknown as Subscription;
 
     // Create a mock consumer with subscriptions.create
-    mockConsumer = {
+    mock_consumer = {
       subscriptions: {
         create: vi.fn((_channel, callbacks) => {
           // Store the callbacks for later use
-          connectedCallback = callbacks.connected?.bind(mockSubscription);
-          receivedCallback = callbacks.received?.bind(mockSubscription);
-          return mockSubscription;
+          connected_callback = callbacks.connected?.bind(mock_subscription);
+          received_callback = callbacks.received?.bind(mock_subscription);
+          return mock_subscription;
         }),
       },
     } as unknown as Consumer;
 
-    transport = new WebSocketsTransport(mockConsumer);
+    transport = new WebSocketsTransport(mock_consumer);
   });
 
   describe("constructor", () => {
@@ -45,14 +46,14 @@ describe("WebSocketsTransport", () => {
 
   describe("start", () => {
     it("starts the channel", () => {
-      const startSpy = vi.spyOn(transport.channel, "start");
+      const start_spy = vi.spyOn(transport.channel, "start");
       transport.start();
-      expect(startSpy).toHaveBeenCalled();
+      expect(start_spy).toHaveBeenCalled();
     });
 
     it("creates a subscription to LiveComponentChannel", () => {
       transport.start();
-      expect(mockConsumer.subscriptions.create).toHaveBeenCalledWith(
+      expect(mock_consumer.subscriptions.create).toHaveBeenCalledWith(
         { channel: "LiveComponentChannel" },
         expect.objectContaining({
           connected: expect.any(Function),
@@ -77,44 +78,46 @@ describe("WebSocketsTransport", () => {
       transport.start();
 
       // Simulate the connection being established
-      if (connectedCallback) {
-        connectedCallback();
+      if (connected_callback) {
+        connected_callback();
       }
 
       // Wait a tick for the subscription promise to resolve
       await new Promise((resolve) => setTimeout(resolve, 0));
 
       // Create a promise that will be resolved when we simulate the response
-      const renderPromise = transport.render(request);
+      const render_promise = transport.render(request);
+      const payload = await encode_request(request);
 
       // Wait a tick for the send to be called
       await new Promise((resolve) => setTimeout(resolve, 0));
 
       // Get the request_id that was sent
-      expect(mockSubscription.send).toHaveBeenCalledWith(
+      expect(mock_subscription.send).toHaveBeenCalledWith(
         expect.objectContaining({
-          payload: JSON.stringify(request),
+          payload,
           request_id: expect.any(String),
         })
       );
 
       // Simulate receiving a response from the server
-      const sentCall = (mockSubscription.send as any).mock.calls[0][0];
-      const requestId = sentCall.request_id;
+      const sent_call = (mock_subscription.send as any).mock.calls[0][0];
+      const request_id = sent_call.request_id;
 
       // Simulate the server response
-      const mockResponse = "<div>Rendered HTML</div>";
-      if (receivedCallback) {
-        receivedCallback({
-          request_id: requestId,
-          payload: mockResponse,
+      const mock_response = "<div>Rendered HTML</div>";
+      const encoded_mock_response = await encode(mock_response);
+      if (received_callback) {
+        received_callback({
+          request_id: request_id,
+          payload: encoded_mock_response,
         });
       }
 
       // Wait for the promise to resolve
-      const result = await renderPromise;
+      const result = await render_promise;
 
-      expect(result).toBe(mockResponse);
+      expect(result).toBe(mock_response);
     });
 
     it("handles multiple concurrent requests", async () => {
@@ -132,8 +135,8 @@ describe("WebSocketsTransport", () => {
       transport.start();
 
       // Simulate the connection being established
-      if (connectedCallback) {
-        connectedCallback();
+      if (connected_callback) {
+        connected_callback();
       }
 
       // Wait for the subscription promise to resolve
@@ -143,33 +146,39 @@ describe("WebSocketsTransport", () => {
       const promise1 = transport.render(request1);
       const promise2 = transport.render(request2);
 
-      // Wait for both sends to be called
-      await new Promise((resolve) => setTimeout(resolve, 0));
+      // Wait for both sends to be called (need to wait longer for async encoding)
+      await new Promise((resolve) => setTimeout(resolve, 100));
 
       // Get the request IDs
-      const calls = (mockSubscription.send as any).mock.calls;
-      const requestId1 = calls[0][0].request_id;
-      const requestId2 = calls[1][0].request_id;
+      const calls = (mock_subscription.send as any).mock.calls;
+      const request_id1 = calls[0][0].request_id;
+      const request_id2 = calls[1][0].request_id;
+
+      // Encode the responses
+      const response1 = "<div>Response 1</div>";
+      const response2 = "<div>Response 2</div>";
+      const encoded_response1 = await encode(response1);
+      const encoded_response2 = await encode(response2);
 
       // Respond to request 2 first (out of order)
-      if (receivedCallback) {
-        receivedCallback({
-          request_id: requestId2,
-          payload: "<div>Response 2</div>",
+      if (received_callback) {
+        received_callback({
+          request_id: request_id2,
+          payload: encoded_response2,
         });
       }
 
       // Respond to request 1
-      if (receivedCallback) {
-        receivedCallback({
-          request_id: requestId1,
-          payload: "<div>Response 1</div>",
+      if (received_callback) {
+        received_callback({
+          request_id: request_id1,
+          payload: encoded_response1,
         });
       }
 
       // Both promises should resolve with the correct responses
-      expect(await promise1).toBe("<div>Response 1</div>");
-      expect(await promise2).toBe("<div>Response 2</div>");
+      expect(await promise1).toBe(response1);
+      expect(await promise2).toBe(response2);
     });
   });
 });

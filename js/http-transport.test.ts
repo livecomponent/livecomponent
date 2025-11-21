@@ -1,6 +1,7 @@
 import { HTTPTransport } from "./http-transport";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { RenderRequest } from "./live-component";
+import { encode, encode_request } from "./payload";
 
 describe("HTTPTransport", () => {
   let transport: HTTPTransport;
@@ -28,12 +29,13 @@ describe("HTTPTransport", () => {
 
   describe("render", () => {
     it("makes a POST request to the render URL", async () => {
-      const mockResponse = "<div>Rendered HTML</div>";
-      const mockFetch = vi.fn().mockResolvedValue({
-        text: () => Promise.resolve(mockResponse),
+      const mock_response = "<div>Rendered HTML</div>";
+      const encoded_mock_response = await encode(mock_response);
+      const mock_fetch = vi.fn().mockResolvedValue({
+        text: () => Promise.resolve(encoded_mock_response),
       });
 
-      global.fetch = mockFetch;
+      global.fetch = mock_fetch;
 
       const request: RenderRequest = {
         state: {
@@ -45,17 +47,18 @@ describe("HTTPTransport", () => {
       };
 
       const result = await transport.render(request);
+      const payload = await encode_request(request);
 
-      expect(mockFetch).toHaveBeenCalledWith("/live_component/render", {
+      expect(mock_fetch).toHaveBeenCalledWith("/live_component/render", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           "Accept": "text/html",
         },
-        body: JSON.stringify({ payload: JSON.stringify(request) }),
+        body: JSON.stringify({payload}),
       });
 
-      expect(result).toBe(mockResponse);
+      expect(result).toBe(mock_response);
     });
   });
 });
