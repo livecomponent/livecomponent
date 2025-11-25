@@ -1,8 +1,9 @@
 import { TurboSubmitEndEvent, TurboSubmitStartEvent } from "@hotwired/turbo";
-import { Application as Stimulus } from "@hotwired/stimulus"
+import { Application as Stimulus, Controller } from "@hotwired/stimulus"
 import { Idiomorph } from "idiomorph";
 import { LiveComponent, RenderRequest } from "./live-component";
 import { HTTPTransport } from "./http-transport";
+import { LiveController, LiveControllerClass } from "./live-controller";
 
 const handle_turbo_submit_start = (event: TurboSubmitStartEvent) => {
   const element = find_rerender_target(event.target as HTMLFormElement);
@@ -103,6 +104,43 @@ export class Application {
     this.resolve_application(this.application);
 
     return this.application;
+  }
+
+  static register<T extends LiveControllerClass<Controller>>(ruby_class_name: string, constructor: T) {
+    const controller_name = ruby_class_name.replace("::", "-").toLowerCase();
+    const custom_element_name =
+      controller_name.split("-").length === 1 ?
+        `lc-${controller_name}` :
+        controller_name;
+
+    if (!window.customElements.get(custom_element_name)) {
+      window.customElements.define(custom_element_name, class extends LiveComponent { });
+    }
+
+    constructor.identifier = controller_name;
+
+    Application.instance.then(app => {
+      app.stimulus.register(controller_name, constructor);
+    });
+
+    for (const target_name of constructor.targets) {
+      Object.defineProperties(constructor.prototype, this.properties_for_target(target_name));
+    }
+  }
+
+  private static properties_for_target(target_name: string) {
+    return {
+      [`${target_name}TargetComponent`]: {
+        get(this: LiveController | null): LiveController | null {
+          if (!this) return null;
+
+          const element = this.element.querySelector(`[data-${this.identifier}-target="${target_name}"]`)
+          if (!element) return null;
+
+          return (element.closest("[data-livecomponent]:not([data-controller=livereact])") as LiveComponent)?._controller || null;
+        }
+      }
+    };
   }
 
   public transport: Transport;

@@ -1,9 +1,9 @@
 import { Controller } from "@hotwired/stimulus";
-import { live } from "./live";
 import { LiveComponent, Props, RenderRequest, State } from "./live-component";
 import { ComponentBuilder } from "./component-builder";
 import { Constructor } from "./constructor";
 import { AsyncTaskQueue } from "./queue";
+import { live } from "./live";
 
 type RenderBlock<P> = (component: ComponentBuilder<State<P>, P>) => void;
 
