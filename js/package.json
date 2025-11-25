@@ -1,6 +1,6 @@
 {
   "name": "@camertron/live-component",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Client-side rendering and state management for ViewComponent.",
   "type": "module",
   "files": [
