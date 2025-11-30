@@ -4,17 +4,18 @@ module LiveComponent
   class ModelSerializer
     MODEL_SERIALIZER_KEY = "_lc_ar".freeze
 
-    attr_reader :sign, :load, :attributes
+    attr_reader :sign, :reload, :attributes
 
     alias sign? sign
-    alias load? load
+    alias reload? reload
 
     def self.make(...)
       new(...)
     end
 
-    def initialize(sign: true, load: false, attributes: true)
+    def initialize(sign: true, reload: false, attributes: true)
       @sign = sign
+      @reload = reload
       @attributes = attributes.is_a?(Array) ? attributes.map(&:to_s) : attributes
     end
 
@@ -50,7 +51,7 @@ module LiveComponent
       gid = gid_attrs["gid"]
       signed = gid_attrs["signed"]
 
-      if load?
+      if reload?
         if signed
           GlobalID::Locator.locate_signed(gid)
         else

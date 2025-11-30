@@ -25,17 +25,17 @@ module LiveComponent
     end
 
     def initialize
-      add_serializer(BigDecimal, BigDecimalSerializer)
-      add_serializer(Date, DateSerializer)
-      add_serializer(DateTime, DateTimeSerializer)
-      add_serializer(ActiveSupport::Duration, DurationSerializer)
-      add_serializer(Module, ModuleSerializer)
-      add_serializer(Range, RangeSerializer)
-      add_serializer(Time, TimeSerializer)
-      add_serializer(ActiveSupport::TimeWithZone, TimeWithZoneSerializer)
+      register(BigDecimal, BigDecimalSerializer)
+      register(Date, DateSerializer)
+      register(DateTime, DateTimeSerializer)
+      register(ActiveSupport::Duration, DurationSerializer)
+      register(Module, ModuleSerializer)
+      register(Range, RangeSerializer)
+      register(Time, TimeSerializer)
+      register(ActiveSupport::TimeWithZone, TimeWithZoneSerializer)
     end
 
-    def add_serializer(klass, serializer_klass)
+    def register(klass, serializer_klass)
       self.serializers[klass] = serializer_klass.make
     end
 

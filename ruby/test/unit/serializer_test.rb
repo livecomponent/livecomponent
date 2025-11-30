@@ -138,7 +138,7 @@ module SerializerTests
     end
 
     test "serializes with a custom serializer" do
-      LiveComponent.serializer.add_serializer(TestObject, TestObjectSerializer)
+      LiveComponent.serializer.register(TestObject, TestObjectSerializer)
       assert_equal(
         { "_lc_ser" => "SerializerTests::TestObject", "value" => "value" },
         serialize(TestObject.new("value"))
@@ -237,7 +237,7 @@ module SerializerTests
     end
 
     test "deserializes with a custom serializer" do
-      LiveComponent.serializer.add_serializer(TestObject, TestObjectSerializer)
+      LiveComponent.serializer.register(TestObject, TestObjectSerializer)
       result = deserialize({ "_lc_ser" => "SerializerTests::TestObject", "value" => "value" })
 
       assert_equal TestObject, result.class

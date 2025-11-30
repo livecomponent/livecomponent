@@ -26,6 +26,8 @@ export type RubyHashWithIndifferentAccess<T extends Record<string, any>> = RubyH
   _lc_hwia: true;
 }
 
+export type AnyRubyHash<T> = RubyHash<T> | RubySymbolHash<T> | RubyHashWithIndifferentAccess<T>;
+
 export const Ruby = {
   make_symbol: (value: string): RubySymbol => {
     return {value, _lc_sym: true};
@@ -44,7 +46,7 @@ export const Ruby = {
   },
 
   hash_set<T extends Record<string, any>, K extends keyof T & string>(
-    hash: RubyHash<T> | RubySymbolHash<T> | RubyHashWithIndifferentAccess<T>,
+    hash: AnyRubyHash<T>,
     key: K | RubySymbol,
     value: T[K]
   ) {
@@ -59,7 +61,7 @@ export const Ruby = {
   },
 
   hash_set_symbol<T extends Record<string, any>, K extends keyof T & string>(
-    hash: RubyHash<T> | RubySymbolHash<T> | RubyHashWithIndifferentAccess<T>,
+    hash: AnyRubyHash<T>,
     key: K,
     value: T[K]
   ) {
@@ -71,20 +73,52 @@ export const Ruby = {
   },
 
   hash_get<T extends Record<string, any>, K extends keyof T & string>(
-    hash: RubyHash<T> | RubySymbolHash<T> | RubyHashWithIndifferentAccess<T>,
+    hash: AnyRubyHash<T>,
     key: K | RubySymbol
-  ) {
-    const actualKey = typeof key === 'object' && '_lc_sym' in key ? key.value : key;
+  ): T[K] | undefined {
+    const isSymbol = typeof key === 'object' && '_lc_sym' in key;
+    const actualKey = isSymbol ? key.value : key;
+
+    // If the key is a string (not a RubySymbol), check if it's stored as a symbol key
+    // If so, return undefined since we're accessing with wrong key type
+    if (!isSymbol && "_lc_symkeys" in hash && hash._lc_symkeys.includes(actualKey as string)) {
+      return undefined;
+    }
+
     return hash[actualKey as K];
   },
 
-  hash_delete<T extends Record<string, any>, K extends keyof T & string>(
-    hash: RubyHash<T> | RubySymbolHash<T> | RubyHashWithIndifferentAccess<T>,
-    key: K | RubySymbol
-  ) {
-    const actualKey = typeof key === 'object' && '_lc_sym' in key ? key.value : key;
+  hash_get_symbol<T extends Record<string, any>, K extends keyof T & string>(
+    hash: AnyRubyHash<T>,
+    key: K
+  ): T[K] | undefined {
+    // For symbol hashes, all keys are symbols
+    if ("_lc_symhash" in hash) {
+      return hash[key];
+    }
 
-    if ("_lc_symkeys" in hash) {
+    // For regular hashes, only return if the key is in _lc_symkeys
+    if ("_lc_symkeys" in hash && hash._lc_symkeys.includes(key)) {
+      return hash[key];
+    }
+
+    return undefined;
+  },
+
+  hash_delete<T extends Record<string, any>, K extends keyof T & string>(
+    hash: AnyRubyHash<T>,
+    key: K | RubySymbol
+  ): T[K] | undefined {
+    const isSymbol = typeof key === 'object' && '_lc_sym' in key;
+    const actualKey = isSymbol ? key.value : key;
+
+    // If the key is a string (not a RubySymbol), check if it's stored as a symbol key
+    // If so, don't delete since we're accessing with wrong key type
+    if (!isSymbol && "_lc_symkeys" in hash && hash._lc_symkeys.includes(actualKey as string)) {
+      return undefined;
+    }
+
+    if (isSymbol && "_lc_symkeys" in hash) {
       const index = hash._lc_symkeys.indexOf(actualKey);
 
       if (index > -1) {
@@ -92,14 +126,43 @@ export const Ruby = {
       }
     }
 
+    const value = hash[actualKey as K];
     delete hash[actualKey as K];
+
+    return value;
   },
 
-  object_to_hash<T>(object: T): RubyHash<T> {
+  hash_delete_symbol<T extends Record<string, any>, K extends keyof T & string>(
+    hash: AnyRubyHash<T>,
+    key: K
+  ): T[K] | undefined {
+    // For symbol hashes, all keys are symbols
+    if ("_lc_symhash" in hash) {
+      const value = hash[key];
+      delete hash[key];
+      return value;
+    }
+
+    // For regular hashes, only delete if the key is in _lc_symkeys
+    if ("_lc_symkeys" in hash && hash._lc_symkeys.includes(key)) {
+      const index = hash._lc_symkeys.indexOf(key);
+      if (index > -1) {
+        hash._lc_symkeys.splice(index, 1);
+      }
+
+      const value = hash[key];
+      delete hash[key];
+      return value;
+    }
+
+    return undefined;
+  },
+
+  object_to_hash<T extends Record<string, unknown>>(object: T): RubyHash<T> {
     return {_lc_symkeys: [], ...object};
   },
 
-  object_to_symbol_hash<T>(object: T): RubySymbolHash<T> {
+  object_to_symbol_hash<T extends Record<string, unknown>>(object: T): RubySymbolHash<T> {
     return {_lc_symhash: true, ...object};
   }
 }

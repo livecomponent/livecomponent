@@ -99,12 +99,6 @@ describe("Ruby", () => {
       expect(Ruby.hash_get(hash, "foo")).toBe("bar");
     });
 
-    it("gets the value for the symbol key", () => {
-      const hash = Ruby.make_hash();
-      Ruby.hash_set_symbol(hash, "foo", "bar");
-      expect(Ruby.hash_get(hash, "foo")).toBe("bar");
-    });
-
     it("gets the value using a RubySymbol as the key", () => {
       const hash = Ruby.make_hash();
       Ruby.hash_set_symbol(hash, "foo", "bar");
@@ -115,6 +109,44 @@ describe("Ruby", () => {
     it("returns undefined if the key doesn't exist in the hash", () => {
       const hash = Ruby.make_hash();
       expect(Ruby.hash_get(hash, "foo")).toBe(undefined);
+    });
+
+    it ("returns undefined even if the symbol key exists", () => {
+      const hash = Ruby.make_hash();
+      Ruby.hash_set_symbol(hash, "foo", "bar");
+      expect(Ruby.hash_get(hash, "foo")).toBe(undefined);
+    });
+
+    it("gets the value from a symbol hash", () => {
+      const hash = Ruby.make_symbol_hash<{foo: string}>();
+      Ruby.hash_set(hash, "foo", "bar");
+      expect(Ruby.hash_get(hash, "foo")).toBe("bar");
+    });
+
+    it("gets the value from a hash with indifferent access", () => {
+      const hash = Ruby.make_hash_with_indifferent_access<{foo: string}>();
+      Ruby.hash_set(hash, "foo", "bar");
+      expect(Ruby.hash_get(hash, "foo")).toBe("bar");
+    });
+  });
+
+  describe("hash_get_symbol", () => {
+    it("gets the value for the key", () => {
+      const hash = Ruby.make_hash();
+      Ruby.hash_set_symbol(hash, "foo", "bar");
+      expect(Ruby.hash_get_symbol(hash, "foo")).toBe("bar");
+    });
+
+    it ("returns undefined even if the string key exists", () => {
+      const hash = Ruby.make_hash();
+      Ruby.hash_set(hash, "foo", "bar");
+      expect(Ruby.hash_get_symbol(hash, "foo")).toBe(undefined);
+    });
+
+    it("gets the value from a symbol hash", () => {
+      const hash = Ruby.make_symbol_hash<{foo: string}>();
+      Ruby.hash_set(hash, "foo", "bar");
+      expect(Ruby.hash_get_symbol(hash, "foo")).toBe("bar");
     });
   });
 
@@ -132,12 +164,74 @@ describe("Ruby", () => {
     it("deletes the value for the key when the key is a RubySymbol", () => {
       const hash = Ruby.make_hash();
       Ruby.hash_set_symbol(hash, "foo", "bar");
-      expect(Ruby.hash_get(hash, "foo")).toBe("bar");
+      expect(Ruby.hash_get_symbol(hash, "foo")).toBe("bar");
       const symbol = Ruby.make_symbol("foo");
       Ruby.hash_delete(hash, symbol);
-      expect(Ruby.hash_get(hash, "foo")).toBe(undefined);
+      expect(Ruby.hash_get_symbol(hash, "foo")).toBe(undefined);
       expect(hash.foo).toBe(undefined);
       expect(hash._lc_symkeys).not.toContain("foo");
+    });
+
+    it("does not delete the value even if the symbol key exists", () => {
+      const hash = Ruby.make_hash();
+      Ruby.hash_set_symbol(hash, "foo", "bar");
+      Ruby.hash_delete(hash, "foo");
+      expect(Ruby.hash_get_symbol(hash, "foo")).toBe("bar");
+    });
+
+    it("returns the deleted value", () => {
+      const hash = Ruby.make_hash();
+      Ruby.hash_set(hash, "foo", "bar");
+      expect(Ruby.hash_delete(hash, "foo")).toStrictEqual("bar");
+    });
+
+    it("returns undefined when key doesn't exist", () => {
+      const hash = Ruby.make_hash();
+      expect(Ruby.hash_delete(hash, "foo")).toBe(undefined);
+    });
+
+    it("deletes from a hash with indifferent access", () => {
+      const hash = Ruby.make_hash_with_indifferent_access<{foo: string}>();
+      Ruby.hash_set(hash, "foo", "bar");
+      expect(Ruby.hash_get(hash, "foo")).toBe("bar");
+      Ruby.hash_delete(hash, "foo");
+      expect(Ruby.hash_get(hash, "foo")).toBe(undefined);
+    });
+  });
+
+  describe("hash_delete_symbol", () => {
+    it("deletes the value for the symbol key", () => {
+      const hash = Ruby.make_hash();
+      Ruby.hash_set_symbol(hash, "foo", "bar");
+      expect(Ruby.hash_get_symbol(hash, "foo")).toBe("bar");
+      Ruby.hash_delete_symbol(hash, "foo");
+      expect(Ruby.hash_get_symbol(hash, "foo")).toBe(undefined);
+    });
+
+    it("does not delete the value even if the string key exists", () => {
+      const hash = Ruby.make_hash();
+      Ruby.hash_set(hash, "foo", "bar");
+      expect(Ruby.hash_get(hash, "foo")).toBe("bar");
+      Ruby.hash_delete_symbol(hash, "foo");
+      expect(Ruby.hash_get(hash, "foo")).toBe("bar");
+    });
+
+    it("returns the deleted value", () => {
+      const hash = Ruby.make_hash();
+      Ruby.hash_set_symbol(hash, "foo", "bar");
+      expect(Ruby.hash_delete_symbol(hash, "foo")).toBe("bar");
+    });
+
+    it("returns undefined when key doesn't exist", () => {
+      const hash = Ruby.make_hash();
+      expect(Ruby.hash_delete_symbol(hash, "foo")).toBe(undefined);
+    });
+
+    it("deletes from a symbol hash", () => {
+      const hash = Ruby.make_symbol_hash<{foo: string}>();
+      Ruby.hash_set(hash, "foo", "bar");
+      Ruby.hash_delete_symbol(hash, "foo");
+      expect(hash.foo).toBe(undefined);
     });
   });
 
