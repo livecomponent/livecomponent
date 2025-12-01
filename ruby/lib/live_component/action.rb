@@ -21,9 +21,9 @@ module LiveComponent
     end
 
     def to_attributes
-      { data: {} }.tap do |attrs|
+      {}.tap do |attrs|
         if @method_name
-          attrs[:data][:action] = "#{@event_name}->#{@controller_name}##{@method_name}"
+          attrs[:"data-action"] = "#{@event_name}->#{@controller_name}##{@method_name}"
         end
       end
     end
