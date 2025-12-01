@@ -50,6 +50,10 @@ module LiveComponent
     end
 
     def translate_all_attrs(kwargs)
+      kwargs = kwargs.reject do |_, v|
+        v.is_a?(String) && v.start_with?("fn:")
+      end
+
       # TODO: allow folks to add their own attr classes?
       [Action, Target].inject(kwargs) do |memo, attr_klass|
         if kwargs.include?(attr_klass.attr_name)

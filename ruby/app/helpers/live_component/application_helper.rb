@@ -28,7 +28,10 @@ module LiveComponent
 
     def content_tag(name, content_or_options_with_block = nil, options = nil, escape = true, &block)
       if block_given?
-        options = content_or_options_with_block if content_or_options_with_block.is_a?(Hash)
+        if content_or_options_with_block.is_a?(Hash)
+          options = content_or_options_with_block
+          content_or_options_with_block = nil
+        end
       end
 
       options ||= {}
