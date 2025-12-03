@@ -4,6 +4,7 @@ import { LiveController } from "./live-controller";
 import { Application } from "./application";
 
 export type Props<T = {[key: string]: any}> = T;
+export type SlotDefs = Record<string, Props>;
 export type Block = (builder: ComponentBuilder) => string | void;
 export type Reflex<P extends Props = Props> = {
   method_name: string,
@@ -22,24 +23,24 @@ export type State<P extends Props = Props> = {
   }
 }
 
-export class LiveComponent<P extends Props = Props> extends HTMLElement {
-  public controller: Promise<LiveController<P>>;
+export class LiveComponent<P extends Props = Props, SL extends SlotDefs = SlotDefs> extends HTMLElement {
+  public controller: Promise<LiveController<P, SL>>;
 
   // non-async way of getting the controller; shold only be used by event handlers
   // and such that cannot be async
-  public _controller: LiveController<P> | null = null;
-  private resolve_controller: (controller: LiveController<P>) => void;
+  public _controller: LiveController<P, SL> | null = null;
+  private resolve_controller: (controller: LiveController<P, SL>) => void;
 
   constructor() {
     super();
 
     this._controller = null;
-    this.controller = new Promise((resolve: (controller: LiveController<P>) => void) => {
+    this.controller = new Promise((resolve: (controller: LiveController<P, SL>) => void) => {
       this.resolve_controller = resolve;
     });
   }
 
-  set_controller(controller: LiveController<P>) {
+  set_controller(controller: LiveController<P, SL>) {
     this.resolve_controller(controller);
     this._controller = controller;
   }

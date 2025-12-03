@@ -1,21 +1,19 @@
 import { Controller } from "@hotwired/stimulus";
-import { LiveComponent, Props, RenderRequest, State } from "./live-component";
+import { LiveComponent, Props, RenderRequest, SlotDefs, State } from "./live-component";
 import { ComponentBuilder } from "./component-builder";
 import { Constructor } from "./constructor";
 import { AsyncTaskQueue } from "./queue";
 import { live } from "./live";
 
-type RenderBlock<P> = (component: ComponentBuilder<State<P>, P>) => void;
+type RenderBlock<P, SL extends SlotDefs> = (component: ComponentBuilder<State<P>, P, SL>) => void;
 
 export type LiveControllerClass<T> = {
   identifier: string
   targets: string[]
 } & Constructor<T>
 
-export type PropHook<T> = [T, (new_value: T) => void];
-
 @live("Live")
-export class LiveController<P extends Props = Props> extends Controller {
+export class LiveController<P extends Props = Props, SL extends SlotDefs = SlotDefs> extends Controller {
   static identifier: string;
 
   public state: State<P>;
@@ -64,7 +62,7 @@ export class LiveController<P extends Props = Props> extends Controller {
   }
 
   initialize() {
-    (this.element as LiveComponent).set_controller(this);
+    (this.element as LiveComponent<P, SL>).set_controller(this);
   }
 
   connect() {
@@ -131,10 +129,10 @@ export class LiveController<P extends Props = Props> extends Controller {
     this.after_update();
   }
 
-  async render(cb?: RenderBlock<P>): Promise<void> {
+  async render(cb?: RenderBlock<P, SL>): Promise<void> {
     return this.task_queue.enqueue(async () => {
       const new_state = JSON.parse(JSON.stringify(this.state)) as State<P>;
-      const builder = new ComponentBuilder(new_state);
+      const builder = new ComponentBuilder<State<P>, P, SL>(new_state);
       if (cb) cb(builder);
 
       const request: RenderRequest = {

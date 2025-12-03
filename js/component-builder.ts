@@ -1,6 +1,10 @@
-import { Block, Props, Reflex, State } from "./live-component";
+import { Block, Props, Reflex, SlotDefs, State } from "./live-component";
 
-export class ComponentBuilder<S extends State = State, P extends Props = S extends State<infer U> ? U : Props> {
+export class ComponentBuilder<
+  S extends State = State,
+  P extends Props = S extends State<infer U> ? U : Props,
+  SL extends SlotDefs = SlotDefs
+> {
   public state: S;
   public reflexes: Reflex[] = [];
 
@@ -12,13 +16,21 @@ export class ComponentBuilder<S extends State = State, P extends Props = S exten
     return this.state.props as P;
   }
 
-  with(slot_name: string, block?: Block): ComponentBuilder<S, P>;
-  with<T extends Props>(slot_name: string, props: T, block?: Block): ComponentBuilder<S, P>;
+  // overload with props
+  with<K extends string>(
+    slot_name: K,
+    props: K extends keyof SL ? SL[K] : Props,
+    block?: Block
+  ): ComponentBuilder<S, P, SL>;
+
+  // overload with just a block
+  with(slot_name: string, block?: Block): ComponentBuilder<S, P, SL>;
+
   with<T extends Props>(
     slot_name: string,
     arg1?: T | Block,
     arg2?: Block,
-  ): ComponentBuilder<S, P> {
+  ): ComponentBuilder<S, P, SL> {
     let props: T;
     let block: Block | undefined = undefined;
 
@@ -49,7 +61,7 @@ export class ComponentBuilder<S extends State = State, P extends Props = S exten
     return this;
   }
 
-  call<T extends Props>(method_name: string, props?: T): ComponentBuilder<S, P> {
+  call<T extends Props>(method_name: string, props?: T): ComponentBuilder<S, P, SL> {
     this.reflexes.push({method_name, props: props || {}});
     return this;
   }
