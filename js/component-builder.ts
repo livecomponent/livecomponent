@@ -16,6 +16,10 @@ export class ComponentBuilder<
     return this.state.props as P;
   }
 
+  get slots() {
+    return this.state.slots;
+  }
+
   // overload with props
   with<K extends string>(
     slot_name: K,
