@@ -11,12 +11,14 @@ module LiveComponent
     class << self
       def decode(data)
         data = Base64.decode64(data)
-        data = Zlib.gunzip(data) if gzipped?(data)
-        JSON.parse(data)
+        compressed = gzipped?(data)
+        data = Zlib.gunzip(data) if compressed
+        [JSON.parse(data), compressed]
       end
 
-      def encode(data)
-        Base64.encode64(Zlib.gzip(data))
+      def encode(data, compress: true)
+        data = Zlib.gzip(data) if compress
+        Base64.encode64(data)
       end
 
       private

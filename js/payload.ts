@@ -6,16 +6,21 @@ export const encode_request = async (request: RenderRequest): Promise<string> =>
 }
 
 export const encode = async (data: string): Promise<string> => {
-  const stream = new Blob([data], {type: "text/plain"}).stream();
-  const compressed_stream = stream.pipeThrough(new CompressionStream("gzip"));
-  const compressed_response = await new Response(compressed_stream);
-  const compressed_blob = await compressed_response.blob()
-  const buffer = await compressed_blob.arrayBuffer();
-  return btoa(
-    String.fromCharCode(
-      ...new Uint8Array(buffer)
-    )
-  );
+  if ("CompressionStream" in window && typeof window.CompressionStream === "function") {
+    const stream = new Blob([data], {type: "text/plain"}).stream();
+    const compressed_stream = stream.pipeThrough(new CompressionStream("gzip"));
+    const compressed_response = await new Response(compressed_stream);
+    const compressed_blob = await compressed_response.blob()
+    const buffer = await compressed_blob.arrayBuffer();
+
+    return btoa(
+      String.fromCharCode(
+        ...new Uint8Array(buffer)
+      )
+    );
+  }
+
+  return btoa(data);
 }
 
 export const decode = async (data: string): Promise<string> => {

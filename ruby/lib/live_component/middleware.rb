@@ -12,13 +12,13 @@ module LiveComponent
       if env["PATH_INFO"] == "/live_component/render"
         raw_data = env["rack.input"].read
         data = JSON.parse(raw_data)
-        payload = LiveComponent::Payload.decode(data["payload"])
+        payload, compressed = LiveComponent::Payload.decode(data["payload"])
 
         result = LiveComponent::RenderController.renderer.render(
           :show, assigns: { state: payload["state"], reflexes: payload["reflexes"] }, layout: false
         )
 
-        result = LiveComponent::Payload.encode(result)
+        result = LiveComponent::Payload.encode(result, compress: compressed)
 
         return [200, { "Content-Type" => "text/html" }, [result]]
       end

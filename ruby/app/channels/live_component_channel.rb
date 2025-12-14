@@ -7,13 +7,13 @@ class LiveComponentChannel < ActionCable::Channel::Base
 
   def receive(data)
     request_id = data["request_id"]
-    payload = LiveComponent::Payload.decode(data["payload"])
+    payload, compressed = LiveComponent::Payload.decode(data["payload"])
 
     result = LiveComponent::RenderController.renderer.render(
       :show, assigns: { state: payload["state"], reflexes: payload["reflexes"] }, layout: false
     )
 
-    result = LiveComponent::Payload.encode(result)
+    result = LiveComponent::Payload.encode(result, compress: compressed)
 
     ActionCable.server.broadcast(
       "live_component",

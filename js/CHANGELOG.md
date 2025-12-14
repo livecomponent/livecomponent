@@ -1,3 +1,6 @@
+# 0.3.0
+* Only use `CompressionStream` if it's available, i.e. we're running in a modern-ish browser.
+
 # 0.2.0
 * Added additional convenience methods and tests to make working with serialized Ruby objects easier.
 
