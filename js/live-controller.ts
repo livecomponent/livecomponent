@@ -2,7 +2,7 @@ import { Controller } from "@hotwired/stimulus";
 import { LiveComponent, Props, RenderRequest, SlotDefs, State } from "./live-component";
 import { ComponentBuilder } from "./component-builder";
 import { Constructor } from "./constructor";
-import { AsyncTaskQueue } from "./queue";
+import { AsyncTaskQueue, Task, TaskOptions } from "./queue";
 import { live } from "./live";
 
 type RenderBlock<P, SL extends SlotDefs> = (component: ComponentBuilder<State<P>, P, SL>) => void;
@@ -27,7 +27,7 @@ export class LiveController<P extends Props = Props, SL extends SlotDefs = SlotD
     return this.state.props;
   }
 
-  private get task_queue() {
+  protected get task_queue() {
     if (!this._task_queue) {
       this._task_queue = new AsyncTaskQueue();
     }
@@ -129,8 +129,21 @@ export class LiveController<P extends Props = Props, SL extends SlotDefs = SlotD
     this.after_update();
   }
 
-  async render(cb?: RenderBlock<P, SL>): Promise<void> {
-    return this.task_queue.enqueue(async () => {
+  render(options?: TaskOptions)
+  render(options?: TaskOptions, cb?: RenderBlock<P, SL>)
+  render(cb?: RenderBlock<P, SL>): Task<void>
+  render(arg1?: TaskOptions | RenderBlock<P, SL>, arg2?: RenderBlock<P, SL>) {
+    let cb: RenderBlock<P, SL> | undefined = undefined;
+    let options: TaskOptions | undefined = undefined;
+
+    if (typeof arg1 === "function") {
+      cb = arg1;
+    } else {
+      options = arg1;
+      cb = arg2;
+    }
+
+    const task_fn = (async (task?: Task<any>) => {
       const new_state = JSON.parse(JSON.stringify(this.state)) as State<P>;
       const builder = new ComponentBuilder<State<P>, P, SL>(new_state);
       if (cb) cb(builder);
@@ -140,8 +153,12 @@ export class LiveController<P extends Props = Props, SL extends SlotDefs = SlotD
         reflexes: builder.reflexes,
       }
 
-      await (this.element as LiveComponent).render(request);
+      if (task?.canceled) return;
+
+      await (this.element as LiveComponent).render(request, task);
     });
+
+    return this.task_queue.enqueue(task_fn, options);
   }
 
   // Override in derived classes. Called before new state is propagated to this

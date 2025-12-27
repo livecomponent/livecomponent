@@ -1,0 +1,23 @@
+#!/usr/bin/env sh
+
+if ! command -v overmind &> /dev/null
+then
+  echo "Please install overmind."
+  exit 1
+fi
+
+while [[ "$#" > 0 ]]; do case $1 in
+  -d|--debug) debug="1"; shift;;
+esac; done
+
+if [ -n "$debug" ]; then
+  # start non-web processes in the background
+  overmind start --procfile Procfile.dev --daemonize --ignored-processes web
+
+  # Default to port 3000 if not specified
+  export PORT="${PORT:-3000}"
+  web=$(cat Procfile.dev | grep -m 1 "^web:" | cut -d':' -f 2)
+  exec env WEB_CONCURRENCY=0 RAILS_MAX_THREADS=1 $web
+else
+  exec overmind start --procfile Procfile.dev "$@"
+fi

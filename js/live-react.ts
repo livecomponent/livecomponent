@@ -3,6 +3,7 @@ import { createRoot, Root } from "react-dom/client";
 import { live } from "./live";
 import { LiveComponent, RenderRequest, State } from "./live-component";
 import { LiveController } from "./live-controller";
+import { Task } from "queue";
 
 // Define ComponentType locally to avoid circular import with react
 /* @ts-ignore */
@@ -69,8 +70,10 @@ if (!window.customElements.get('live-component-react')) {
 
 @live("LiveReact")
 export class LiveControllerReact extends LiveController {
-  async render() {
-    await (this.element as LiveComponent).render({ state: this.state, reflexes: [] });
+  render(): Task<void> {
+    return this.task_queue.enqueue(async (task?: Task<void>) => {
+      await (this.element as LiveComponent).render({ state: this.state, reflexes: [] }, task);
+    });
   }
 
   async propagate_state(state: State) {

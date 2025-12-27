@@ -1,3 +1,7 @@
+# 0.4.0
+* Allow renders (tasks) to be canceled.
+* Allow renders (tasks) to be preempted. Preempted tasks cause existing tasks to be dequeued and canceled.
+
 # 0.3.0
 * Only use `CompressionStream` if it's available, i.e. we're running in a modern-ish browser.
 

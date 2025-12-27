@@ -14,11 +14,11 @@ describe("AsyncTaskQueue", () => {
             resolve();
           }, 1000);
         });
-      }),
+      }).result,
 
       queue.enqueue(async () => {
         task_results.push("bar");
-      }),
+      }).result,
     ]);
 
     // expect "foo" to be first even though it slept for 1s
@@ -30,15 +30,15 @@ describe("AsyncTaskQueue", () => {
 
     expect(
       await Promise.all([
-        queue.enqueue(async () => "foo"),
-        queue.enqueue(async () => "bar"),
+        queue.enqueue(async () => "foo").result,
+        queue.enqueue(async () => "bar").result,
       ])
     ).toStrictEqual(["foo", "bar"]);
 
     expect(
       await Promise.all([
-        queue.enqueue(async () => "baz"),
-        queue.enqueue(async () => "boo"),
+        queue.enqueue(async () => "baz").result,
+        queue.enqueue(async () => "boo").result,
       ])
     ).toStrictEqual(["baz", "boo"]);
   });

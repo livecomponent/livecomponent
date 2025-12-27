@@ -2,6 +2,7 @@ import { Idiomorph } from "idiomorph";
 import { ComponentBuilder } from "./component-builder";
 import { LiveController } from "./live-controller";
 import { Application } from "./application";
+import { Task } from "queue";
 
 export type Props<T = {[key: string]: any}> = T;
 export type SlotDefs = Record<string, Props>;
@@ -54,9 +55,13 @@ export class LiveComponent<P extends Props = Props, SL extends SlotDefs = SlotDe
     return parent_el?.closest("[data-livecomponent]");
   }
 
-  async render(request: RenderRequest) {
+  async render(request: RenderRequest, task?: Task<any>) {
     const controller = await this.controller;
+    if (task?.canceled) return;
+
     const result = await (await Application.instance).render(request);
+    if (task?.canceled) return;
+
     const el = document.createElement("div");
     el.innerHTML = result;
     const first_child = el.querySelector("[data-livecomponent]") as LiveComponent;

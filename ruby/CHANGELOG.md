@@ -1,3 +1,6 @@
+# 0.4.0
+* See js/CHANGELOG.md.
+
 # 0.3.0
 * Only use `CompressionStream` if it's available, i.e. we're running in a modern-ish browser.
 
