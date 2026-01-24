@@ -1,4 +1,5 @@
 import type { Consumer, Subscription } from "@rails/actioncable";
+import { RenderResponse } from "./live-component";
 
 if (!window.crypto?.randomUUID) {
   /* @ts-ignore */
@@ -29,7 +30,7 @@ if (!window.crypto?.randomUUID) {
 }
 
 export class LiveRenderChannel {
-  private pendingRequests: Map<string, [number | null, (value: string) => void, () => void]> = new Map();
+  private pendingRequests: Map<string, [number | null, (response: RenderResponse) => void, () => void]> = new Map();
   private consumer: Consumer;
   private subscription: Promise<Subscription>;
 
@@ -59,7 +60,12 @@ export class LiveRenderChannel {
               }
 
               channel.pendingRequests.delete(data.request_id);
-              resolveRequest(data.payload);
+
+              if (data.error) {
+                resolveRequest({...data.error, success: false, status: "server-error"});
+              } else {
+                resolveRequest({success: true, body: data.payload});
+              }
             }
           },
         },
@@ -67,11 +73,11 @@ export class LiveRenderChannel {
     });
   }
 
-  async render(payload: string, debug: boolean = false): Promise<string> {
+  async render(payload: string, debug: boolean = false): Promise<RenderResponse> {
     const subscription = await this.subscription;
     const requestId = window.crypto.randomUUID();
 
-    const promise = new Promise<string>((resolve, reject) => {
+    const promise = new Promise<RenderResponse>((resolve, reject) => {
       this.pendingRequests.set(requestId, [debug ? Date.now() : null, resolve, reject]);
     });
 

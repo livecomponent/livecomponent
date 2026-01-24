@@ -6,6 +6,14 @@ class LiveComponentChannel < ActionCable::Channel::Base
   end
 
   def receive(data)
+    broadcast_response(data)
+  rescue Exception => e
+    broadcast_error(data, e)
+  end
+
+  private
+
+  def broadcast_response(data)
     request_id = data["request_id"]
     payload, compressed = LiveComponent::Payload.decode(data["payload"])
 
@@ -18,6 +26,19 @@ class LiveComponentChannel < ActionCable::Channel::Base
     ActionCable.server.broadcast(
       "live_component",
       { payload: result, request_id: request_id }
+    )
+  end
+
+  def broadcast_error(data, e)
+    request_id = data["request_id"]
+    payload = {
+      message: e.message,
+      backtrace: e.backtrace,
+    }
+
+    ActionCable.server.broadcast(
+      "live_component",
+      { error: payload, request_id: request_id }
     )
   end
 end

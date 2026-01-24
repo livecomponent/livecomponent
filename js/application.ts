@@ -1,7 +1,7 @@
 import { TurboSubmitEndEvent, TurboSubmitStartEvent } from "@hotwired/turbo";
 import { Application as Stimulus, Controller } from "@hotwired/stimulus"
 import { Idiomorph } from "idiomorph";
-import { LiveComponent, RenderRequest } from "./live-component";
+import { LiveComponent, RenderRequest, RenderResponse } from "./live-component";
 import { HTTPTransport } from "./http-transport";
 import { LiveController, LiveControllerClass } from "./live-controller";
 
@@ -85,7 +85,7 @@ const find_rerender_target = (form: HTMLFormElement): LiveComponent | null => {
 
 export interface Transport {
   start(): void;
-  render(request: RenderRequest): Promise<string>;
+  render(request: RenderRequest): Promise<RenderResponse>;
 }
 
 export class Application {
@@ -169,7 +169,7 @@ export class Application {
     this.stimulus = stimulus;
   }
 
-  async render(request: RenderRequest): Promise<string> {
+  async render(request: RenderRequest): Promise<RenderResponse> {
     return this.transport.render(request);
   }
 }

@@ -3,6 +3,7 @@ import { ComponentBuilder } from "./component-builder";
 import { LiveController } from "./live-controller";
 import { Application } from "./application";
 import { Task } from "queue";
+import { render_error_dialog } from "./error-dialog";
 
 export type Props<T = {[key: string]: any}> = T;
 export type SlotDefs = Record<string, Props>;
@@ -59,11 +60,20 @@ export class LiveComponent<P extends Props = Props, SL extends SlotDefs = SlotDe
     const controller = await this.controller;
     if (task?.canceled) return;
 
-    const result = await (await Application.instance).render(request);
+    const response = await (await Application.instance).render(request);
     if (task?.canceled) return;
 
+    if (!response.success) {
+      const error_dialog_html = render_error_dialog(response as ErrorResponse);
+      const error_dialog = document.createElement("div");
+      error_dialog.innerHTML = error_dialog_html;
+      document.body.appendChild(error_dialog);
+      (error_dialog.querySelector("dialog") as HTMLDialogElement).showModal();
+      return;
+    }
+
     const el = document.createElement("div");
-    el.innerHTML = result;
+    el.innerHTML = (response as SuccessResponse).body;
     const first_child = el.querySelector("[data-livecomponent]") as LiveComponent;
     const new_state = JSON.parse(first_child.getAttribute("data-state"));
     first_child.removeAttribute("data-state");
@@ -96,6 +106,24 @@ if (!window.customElements.get('live-component')) {
 }
 
 export type RenderRequest = {
-  state: State,
+  state: State
   reflexes: Reflex[]
 }
+
+export type ErrorResponseStatus = "server-error" | "client-error"
+export type ResponseStatus = ErrorResponseStatus | "success" | "unknown";
+
+export type SuccessResponse = {
+  success: true
+  body: string
+}
+
+export type ErrorResponse = {
+  success: false
+  status: ErrorResponseStatus | "unknown"
+  body: string
+  message?: string
+  backtrace?: string[]
+}
+
+export type RenderResponse = SuccessResponse | ErrorResponse;
