@@ -69,11 +69,16 @@ export class TestComponentWrapper {
   }
 
   async render(new_state?: State, block?: () => string) {
-    const mockResponse = `
+    const mockResponseBody = `
       <live-component data-livecomponent="true" data-state='${JSON.stringify(new_state || TestContext.make_state())}'>
         ${block?.() ?? ""}
       </live-component>
     `;
+
+    const mockResponse = {
+      success: true,
+      body: mockResponseBody,
+    };
 
     const mockTransport = this.app.transport;
     vi.mocked(mockTransport.render).mockResolvedValue(mockResponse);

@@ -32,7 +32,11 @@ describe("HTTPTransport", () => {
       const mock_response = "<div>Rendered HTML</div>";
       const encoded_mock_response = await encode(mock_response);
       const mock_fetch = vi.fn().mockResolvedValue({
+        status: 200,
         text: () => Promise.resolve(encoded_mock_response),
+        headers: {
+          get: () => null,
+        },
       });
 
       global.fetch = mock_fetch;
@@ -58,7 +62,10 @@ describe("HTTPTransport", () => {
         body: JSON.stringify({payload}),
       });
 
-      expect(result).toBe(mock_response);
+      expect(result).toStrictEqual({
+        success: true,
+        body: mock_response,
+      });
     });
   });
 });

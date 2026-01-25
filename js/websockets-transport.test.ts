@@ -105,19 +105,22 @@ describe("WebSocketsTransport", () => {
       const request_id = sent_call.request_id;
 
       // Simulate the server response
-      const mock_response = "<div>Rendered HTML</div>";
-      const encoded_mock_response = await encode(mock_response);
+      const mock_response_body = "<div>Rendered HTML</div>";
+      const encoded_body = await encode(mock_response_body);
       if (received_callback) {
         received_callback({
           request_id: request_id,
-          payload: encoded_mock_response,
+          payload: encoded_body,
         });
       }
 
       // Wait for the promise to resolve
       const result = await render_promise;
 
-      expect(result).toBe(mock_response);
+      expect(result).toStrictEqual({
+        success: true,
+        body: mock_response_body,
+      });
     });
 
     it("handles multiple concurrent requests", async () => {
@@ -155,10 +158,10 @@ describe("WebSocketsTransport", () => {
       const request_id2 = calls[1][0].request_id;
 
       // Encode the responses
-      const response1 = "<div>Response 1</div>";
-      const response2 = "<div>Response 2</div>";
-      const encoded_response1 = await encode(response1);
-      const encoded_response2 = await encode(response2);
+      const response1_body = "<div>Response 1</div>";
+      const response2_body = "<div>Response 2</div>";
+      const encoded_response1 = await encode(response1_body);
+      const encoded_response2 = await encode(response2_body);
 
       // Respond to request 2 first (out of order)
       if (received_callback) {
@@ -177,8 +180,14 @@ describe("WebSocketsTransport", () => {
       }
 
       // Both promises should resolve with the correct responses
-      expect(await promise1).toBe(response1);
-      expect(await promise2).toBe(response2);
+      expect(await promise1).toStrictEqual({
+        success: true,
+        body: response1_body,
+      });
+      expect(await promise2).toStrictEqual({
+        success: true,
+        body: response2_body,
+      });
     });
   });
 });
