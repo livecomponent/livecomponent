@@ -1,27 +1,9 @@
-import { TurboSubmitEndEvent, TurboSubmitStartEvent } from "@hotwired/turbo";
+import type { TurboSubmitEndEvent, TurboSubmitStartEvent } from "@hotwired/turbo";
 import { Application as Stimulus, Controller } from "@hotwired/stimulus"
 import { Idiomorph } from "idiomorph";
 import { LiveComponent, RenderRequest, RenderResponse } from "./live-component";
 import { HTTPTransport } from "./http-transport";
 import { LiveController, LiveControllerClass } from "./live-controller";
-
-interface TurboSubmitStartEvent extends CustomEvent {
-  detail: {
-    formSubmission: {
-      body: FormData;
-    };
-  };
-  target: EventTarget | null;
-}
-
-interface TurboSubmitEndEvent extends CustomEvent {
-  detail: {
-    fetchResponse: {
-      responseHTML: Promise<string>;
-    };
-  };
-  target: EventTarget | null;
-}
 
 const handle_turbo_submit_start = (event: TurboSubmitStartEvent) => {
   const element = find_rerender_target(event.target as HTMLFormElement);
@@ -40,6 +22,8 @@ const handle_turbo_submit_start = (event: TurboSubmitStartEvent) => {
 }
 
 const handle_turbo_submit_end = async (event: TurboSubmitEndEvent) => {
+  if (!event.detail.success) return;
+
   const element = find_rerender_target(event.target as HTMLFormElement);
   const response = await event.detail.fetchResponse.responseHTML;
 
