@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "noEmit": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "target": "es2020",
+    "module": "nodenext",
+    "moduleResolution": "nodenext"
+  },
+  "include": ["consumer.ts"]
+}

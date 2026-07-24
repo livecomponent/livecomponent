@@ -3,7 +3,7 @@ import { createRoot, Root } from "react-dom/client";
 import { live } from "./live";
 import { LiveComponent, RenderRequest, State } from "./live-component";
 import { LiveController } from "./live-controller";
-import { Task } from "queue";
+import { Task } from "./queue";
 
 // Define ComponentType locally to avoid circular import with react
 /* @ts-ignore */

@@ -2,7 +2,7 @@ import { Idiomorph } from "idiomorph";
 import { ComponentBuilder } from "./component-builder";
 import { LiveController } from "./live-controller";
 import { Application } from "./application";
-import { Task } from "queue";
+import { Task } from "./queue";
 import { render_error_dialog } from "./error-dialog";
 
 export type Props<T = {[key: string]: any}> = T;
