@@ -5,7 +5,7 @@ module LiveComponent
     isolate_namespace LiveComponent
 
     initializer "live-component.include_helpers" do
-      ActiveSupport.on_load(:action_controller) do
+      ActiveSupport.on_load(:action_controller_base) do
         helper LiveComponent::ApplicationHelper
         include LiveComponent::ControllerMethods
       end
