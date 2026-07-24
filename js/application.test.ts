@@ -71,5 +71,72 @@ describe("Application", () => {
         expect(paragraph?.textContent).toBe("Updated");
       });
     });
+
+    it("does not reject when the form has no data-rerender-* attributes", async () => {
+      // A plain Turbo form with no data-rerender-id / data-rerender-target
+      // attributes (i.e. not managed by LiveComponent). find_rerender_target
+      // returns null for these, and handle_turbo_submit_end must bail out
+      // instead of trying to morph into a null element.
+      const form = document.createElement("form");
+      form.setAttribute("action", "/submit_path");
+      form.setAttribute("method", "post");
+      form.setAttribute("data-turbo", "true");
+      form.innerHTML = `<input type="submit" name="Submit" />`;
+      document.body.appendChild(form);
+
+      const turboStreamResponse = `
+        <turbo-stream action="update" target="this_id_shouldnt_exist">
+          <template><div>ignored</div></template>
+        </turbo-stream>
+      `;
+
+      const mockHeaders = new Headers({
+        "Content-Type": "text/vnd.turbo-stream.html; charset=utf-8",
+      });
+
+      vi.mocked(global.fetch).mockResolvedValue({
+        ok: true,
+        status: 200,
+        statusText: "OK",
+        headers: mockHeaders,
+        text: () => Promise.resolve(turboStreamResponse),
+        clone: function() {
+          return {
+            ok: true,
+            status: 200,
+            statusText: "OK",
+            headers: mockHeaders,
+            text: () => Promise.resolve(turboStreamResponse),
+          } as Response;
+        },
+      } as Response);
+
+      // Catch any unhandled promise rejection produced by the
+      // turbo:submit-end handler while this test runs.
+      let unhandled_rejection: unknown;
+      const on_unhandled_rejection = (reason: unknown) => {
+        unhandled_rejection = reason;
+      };
+      process.on("unhandledRejection", on_unhandled_rejection);
+
+      try {
+        const submit_end = new Promise(resolve => {
+          document.addEventListener("turbo:submit-end", resolve, { once: true });
+        });
+
+        form.requestSubmit();
+        await submit_end;
+
+        // A rejection from the async turbo:submit-end handler is only
+        // reported as unhandledRejection once the microtask queue has
+        // drained at the end of the event-loop turn, so yield one macrotask
+        // before asserting.
+        await new Promise(resolve => setTimeout(resolve, 0));
+      } finally {
+        process.off("unhandledRejection", on_unhandled_rejection);
+      }
+
+      expect(unhandled_rejection).toBeUndefined();
+    });
   });
 });

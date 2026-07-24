@@ -25,6 +25,8 @@ const handle_turbo_submit_end = async (event: TurboSubmitEndEvent) => {
   if (!event.detail.success) return;
 
   const element = find_rerender_target(event.target as HTMLFormElement);
+  if (!element) return;
+
   const response = await event.detail.fetchResponse.responseHTML;
 
   // strip away the turbo-frame and template tags
