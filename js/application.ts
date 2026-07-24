@@ -109,7 +109,7 @@ export class Application {
   }
 
   static register<T extends LiveControllerClass<Controller>>(ruby_class_name: string, constructor: T) {
-    const controller_name = ruby_class_name.replace("::", "-").toLowerCase();
+    const controller_name = ruby_class_name.replaceAll("::", "-").toLowerCase();
     const custom_element_name =
       controller_name.split("-").length === 1 ?
         `lc-${controller_name}` :
