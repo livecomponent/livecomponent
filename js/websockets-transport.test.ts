@@ -149,8 +149,12 @@ describe("WebSocketsTransport", () => {
       const promise1 = transport.render(request1);
       const promise2 = transport.render(request2);
 
-      // Wait for both sends to be called (need to wait longer for async encoding)
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      // Payload encoding is async, so both sends land some time after render()
+      // is called; poll rather than sleeping a fixed amount, which is not long
+      // enough on a loaded machine.
+      await vi.waitFor(() => {
+        expect(mock_subscription.send).toHaveBeenCalledTimes(2);
+      });
 
       // Get the request IDs
       const calls = (mock_subscription.send as any).mock.calls;
