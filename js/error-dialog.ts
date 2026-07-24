@@ -1,6 +1,14 @@
-import { ErrorResponse } from "./live-component";
+import type { ErrorResponse } from "./live-component";
 
-export const render_error_dialog = (response: ErrorResponse) => {
+export const show_error_dialog = (response: ErrorResponse) => {
+  const error_dialog_html = render_error_dialog(response);
+  const error_dialog = document.createElement("div");
+  error_dialog.innerHTML = error_dialog_html;
+  document.body.appendChild(error_dialog);
+  (error_dialog.querySelector("dialog") as HTMLDialogElement).showModal();
+}
+
+const render_error_dialog = (response: ErrorResponse) => {
   const message = response.message ?? "An error occurred";
   const show_backtrace_label = Boolean(response.backtrace);
   const body = response.backtrace

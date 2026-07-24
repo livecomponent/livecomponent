@@ -67,6 +67,30 @@ describe("HTTPTransport", () => {
         body: mock_response,
       });
     });
+
+    it("resolves to a client-error response when fetch rejects", async () => {
+      const network_error = new Error("network failure");
+      global.fetch = vi.fn().mockRejectedValue(network_error);
+
+      const request: RenderRequest = {
+        state: {
+          props: {},
+          slots: {},
+          children: {},
+        },
+        reflexes: [],
+      };
+
+      const result = await transport.render(request);
+
+      expect(result).toStrictEqual({
+        success: false,
+        status: "client-error",
+        message: network_error.message,
+        body: network_error.stack,
+        backtrace: network_error.stack.split("\n"),
+      });
+    });
   });
 });
 

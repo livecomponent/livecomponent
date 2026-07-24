@@ -15,13 +15,13 @@ export class HTTPTransport implements Transport {
 
   async render(request: RenderRequest): Promise<RenderResponse> {
     try {
-      return this.render_request(request);
+      return await this.render_request(request);
     } catch (e) {
       return {
         success: false,
         body: e.stack,
         message: e.message,
-        backtrace: e.stack,
+        backtrace: e.stack?.split("\n"),
         status: "client-error",
       }
     }
