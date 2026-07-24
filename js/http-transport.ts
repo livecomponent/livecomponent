@@ -29,12 +29,16 @@ export class HTTPTransport implements Transport {
 
   private async render_request(request: RenderRequest): Promise<RenderResponse> {
     const payload = await encode_request(request);
+    const csrf_token = document
+      .querySelector('meta[name="csrf-token"]')
+      ?.getAttribute("content");
 
     const response = await fetch(this.url, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Accept": "text/html"
+        "Accept": "text/html",
+        ...(csrf_token ? { "X-CSRF-Token": csrf_token } : {}),
       },
       body: JSON.stringify({payload})
     });
