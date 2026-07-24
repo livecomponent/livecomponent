@@ -74,7 +74,6 @@ export class AsyncTaskQueue<T> {
         const value = await run(task);
         resolve(value);
       } catch (err) {
-        console.log(err);
         reject(err);
       }
     }

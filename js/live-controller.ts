@@ -1,9 +1,10 @@
 import { Context, Controller } from "@hotwired/stimulus";
-import { LiveComponent, Props, RenderRequest, SlotDefs, State } from "./live-component";
+import { ErrorResponse, LiveComponent, Props, RenderRequest, SlotDefs, State } from "./live-component";
 import { ComponentBuilder } from "./component-builder";
 import { Constructor } from "./constructor";
 import { AsyncTaskQueue, Task, TaskOptions } from "./queue";
 import { live } from "./live";
+import { show_error_dialog } from "./error-dialog";
 
 /* @ts-ignore Whattt the hell */
 type RenderBlock<P, SL extends SlotDefs> = (component: ComponentBuilder<State<P>, P, SL>) => void;
@@ -170,7 +171,27 @@ export class LiveController<P extends Props = Props, SL extends SlotDefs = SlotD
       await (this.element as LiveComponent).render(request, task);
     });
 
-    return this.task_queue.enqueue(task_fn, options);
+    const task = this.task_queue.enqueue(task_fn, options);
+
+    // The queue's underlying promise rejects on failure, but callers frequently
+    // don't attach their own .catch/await, which produces unhandled promise
+    // rejections. Attach an internal catch that surfaces the failure via the
+    // error dialog; Task#catch delegates to the underlying promise, so this
+    // marks the rejection handled while still leaving callers free to attach
+    // their own handlers to the returned task.
+    task.catch((err) => {
+      const error_response: ErrorResponse = {
+        success: false,
+        status: "client-error",
+        message: err?.message ?? String(err),
+        body: err?.stack ?? String(err),
+        backtrace: err?.stack?.split("\n"),
+      };
+
+      show_error_dialog(error_response);
+    });
+
+    return task;
   }
 
   // Override in derived classes. Called before new state is propagated to this
