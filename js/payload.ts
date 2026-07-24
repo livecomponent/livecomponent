@@ -1,5 +1,17 @@
 import { RenderRequest } from "./live-component";
 
+// Payload wire formats are NOT symmetric between request and response,
+// despite the shared `encode`/`decode` naming:
+//
+//   request:  base64(gzip?(JSON))       -- produced by encode_request/encode
+//   response: base64(gzip?(raw HTML))   -- consumed by decode below
+//
+// Do not wrap response HTML in JSON "for symmetry" with the request side --
+// decode() below never JSON-parses, so it would render the escaped JSON
+// string instead of markup.
+
+// REQUEST side only. Serializes `request` to JSON, then base64/gzip-encodes
+// it (matching ruby/lib/live_component/payload.rb#decode on the server).
 export const encode_request = async (request: RenderRequest): Promise<string> => {
   const payload = JSON.stringify(request);
   return encode(payload);
@@ -23,6 +35,9 @@ export const encode = async (data: string): Promise<string> => {
   return btoa(data);
 }
 
+// RESPONSE side only. Expects base64(gzip?(raw HTML)) and returns the HTML
+// string as-is -- this never JSON-parses (matching
+// ruby/lib/live_component/payload.rb#encode on the server).
 export const decode = async (data: string): Promise<string> => {
   // decode base64
   const arr = Uint8Array.from(atob(data), c => c.charCodeAt(0));
