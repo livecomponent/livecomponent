@@ -1,23 +1,29 @@
 import { RenderRequest } from "./live-component";
 
-// Payload wire formats are NOT symmetric between request and response,
-// despite the shared `encode`/`decode` naming:
+// Payload wire formats are NOT symmetric between request and response:
 //
-//   request:  base64(gzip?(JSON))       -- produced by encode_request/encode
-//   response: base64(gzip?(raw HTML))   -- consumed by decode below
+//   request:  base64(gzip?(JSON))       -- produced by encode_request
+//   response: base64(gzip?(raw HTML))   -- consumed by decode_response
 //
 // Do not wrap response HTML in JSON "for symmetry" with the request side --
-// decode() below never JSON-parses, so it would render the escaped JSON
+// decode_response() never JSON-parses, so it would render the escaped JSON
 // string instead of markup.
+//
+// Only the client's own two directions get direction-pinned names. The
+// base64/gzip primitive underneath them is used both ways -- by
+// encode_request here, and by the tests that fabricate server responses --
+// so it stays neutral as encode_payload.
 
 // REQUEST side only. Serializes `request` to JSON, then base64/gzip-encodes
-// it (matching ruby/lib/live_component/payload.rb#decode on the server).
+// it (matching ruby/lib/live_component/payload.rb#decode_request on the
+// server).
 export const encode_request = async (request: RenderRequest): Promise<string> => {
   const payload = JSON.stringify(request);
-  return encode(payload);
+  return encode_payload(payload);
 }
 
-export const encode = async (data: string): Promise<string> => {
+// Direction-neutral base64(gzip?) primitive.
+export const encode_payload = async (data: string): Promise<string> => {
   if ("CompressionStream" in window && typeof window.CompressionStream === "function") {
     const stream = new Blob([data], {type: "text/plain"}).stream();
     const compressed_stream = stream.pipeThrough(new CompressionStream("gzip"));
@@ -37,8 +43,8 @@ export const encode = async (data: string): Promise<string> => {
 
 // RESPONSE side only. Expects base64(gzip?(raw HTML)) and returns the HTML
 // string as-is -- this never JSON-parses (matching
-// ruby/lib/live_component/payload.rb#encode on the server).
-export const decode = async (data: string): Promise<string> => {
+// ruby/lib/live_component/payload.rb#encode_response on the server).
+export const decode_response = async (data: string): Promise<string> => {
   // decode base64
   const arr = Uint8Array.from(atob(data), c => c.charCodeAt(0));
 
