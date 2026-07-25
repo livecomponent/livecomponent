@@ -2,11 +2,29 @@ import { decode, encode_request } from "./payload";
 import { Transport } from "./application";
 import { RenderRequest, RenderResponse, ErrorResponseStatus } from "./live-component";
 
+export type HTTPTransportHeaders =
+  | Record<string, string>
+  | (() => Record<string, string> | Promise<Record<string, string>>);
+
+export interface HTTPTransportOptions {
+  // Extra headers merged over the defaults on every request. Pass a function
+  // when the value can change during the page's lifetime — a Rails CSRF
+  // token, for example, is replaced on Turbo navigation.
+  headers?: HTTPTransportHeaders;
+
+  // Forwarded to fetch(). Needed when the render endpoint is a real
+  // controller behind session authentication rather than the Rack
+  // middleware, which requires no cookies.
+  credentials?: RequestCredentials;
+}
+
 export class HTTPTransport implements Transport {
   public url: string;
+  private options: HTTPTransportOptions;
 
-  constructor(url: string = "/live_component/render") {
+  constructor(url: string = "/live_component/render", options: HTTPTransportOptions = {}) {
     this.url = url;
+    this.options = options;
   }
 
   start() {
@@ -34,8 +52,10 @@ export class HTTPTransport implements Transport {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Accept": "text/html"
+        "Accept": "text/html",
+        ...(await this.extra_headers())
       },
+      ...(this.options.credentials ? { credentials: this.options.credentials } : {}),
       body: JSON.stringify({payload})
     });
 
@@ -62,6 +82,13 @@ export class HTTPTransport implements Transport {
         body: decoded_body,
       };
     }
+  }
+
+  private async extra_headers(): Promise<Record<string, string>> {
+    const { headers } = this.options;
+    if (!headers) return {};
+
+    return typeof headers === "function" ? await headers() : headers;
   }
 
   private code_to_error_status(code: number): ErrorResponseStatus | "unknown" | undefined {
