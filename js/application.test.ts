@@ -1,5 +1,11 @@
 import { describe, it, expect, beforeAll, vi } from "vitest";
 import { TestContext, testSetup } from "./test-helpers/setup";
+import { live } from "./live";
+import { LiveController } from "./live-controller";
+
+@live("Documents::ShowEditView::PageHeaderComponent")
+class PageHeaderComponent extends LiveController {
+}
 
 describe("Application", () => {
   let test_context: TestContext;
@@ -70,6 +76,13 @@ describe("Application", () => {
         const paragraph = component.querySelector("p");
         expect(paragraph?.textContent).toBe("Updated");
       });
+    });
+  });
+
+  describe("register", () => {
+    it("dashes every namespace segment of a multi-level Ruby class name", () => {
+      expect(PageHeaderComponent.identifier).toBe("documents-showeditview-pageheadercomponent");
+      expect(window.customElements.get("documents-showeditview-pageheadercomponent")).toBeDefined();
     });
   });
 });
