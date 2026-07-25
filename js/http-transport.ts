@@ -33,7 +33,11 @@ export class HTTPTransport implements Transport {
 
   async render(request: RenderRequest): Promise<RenderResponse> {
     try {
-      return this.render_request(request);
+      // `await` is load-bearing: without it the promise settles after the
+      // try block has exited, so an async rejection -- from a headers
+      // callback, encode_request, or fetch itself -- escapes this handler
+      // and render() rejects instead of resolving to an error response.
+      return await this.render_request(request);
     } catch (e) {
       return {
         success: false,

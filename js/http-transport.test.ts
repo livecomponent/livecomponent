@@ -147,6 +147,34 @@ describe("HTTPTransport", () => {
       expect(mock_fetch.mock.calls[0][1].credentials).toBe("same-origin");
     });
 
+    it("resolves to an error response when fetch rejects", async () => {
+      global.fetch = vi.fn().mockRejectedValue(new Error("network down"));
+
+      const result = await transport.render(example_request());
+
+      expect(result).toMatchObject({
+        success: false,
+        message: "network down",
+        status: "client-error",
+      });
+    });
+
+    it("resolves to an error response when a headers callback throws", async () => {
+      global.fetch = vi.fn();
+
+      const custom = new HTTPTransport("/render", {
+        headers: () => { throw new Error("no token"); },
+      });
+
+      const result = await custom.render(example_request());
+
+      expect(result).toMatchObject({
+        success: false,
+        message: "no token",
+        status: "client-error",
+      });
+    });
+
     it("omits credentials entirely when not provided", async () => {
       const mock_fetch = await mock_ok_fetch();
       global.fetch = mock_fetch;
