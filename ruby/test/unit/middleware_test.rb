@@ -16,7 +16,7 @@ module MiddlewareTests
     end
 
     def encode_request(state:, reflexes: [])
-      LiveComponent::Payload.encode({ "state" => state, "reflexes" => reflexes }.to_json)
+      LiveComponent::Payload.encode_payload({ "state" => state, "reflexes" => reflexes }.to_json)
     end
 
     test "renders and returns 200 with encoded payload body" do

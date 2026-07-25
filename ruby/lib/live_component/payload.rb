@@ -32,6 +32,14 @@ module LiveComponent
       # RESPONSE side only. `data` must already be raw HTML (a String), not
       # JSON -- this only base64/gzip-encodes it, it does not serialize.
       def encode_response(data, compress: true)
+        encode_payload(data, compress: compress)
+      end
+
+      # Direction-neutral base64(gzip?) primitive shared by both directions.
+      # Production code should prefer #encode_response, which says which way
+      # the payload is travelling; this exists for callers that build request
+      # payloads, such as the transport tests.
+      def encode_payload(data, compress: true)
         data = Zlib.gzip(data) if compress
         Base64.encode64(data)
       end

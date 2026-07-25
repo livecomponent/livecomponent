@@ -5,7 +5,7 @@ require_relative "../test_helper"
 module RendererTests
   class RendererTest < TestCase
     def encode_request(state:, reflexes: [], compress: true)
-      LiveComponent::Payload.encode(
+      LiveComponent::Payload.encode_payload(
         { "state" => state, "reflexes" => reflexes }.to_json, compress: compress
       )
     end

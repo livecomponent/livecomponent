@@ -7,7 +7,7 @@ module LiveComponentChannelTests
     tests LiveComponentChannel
 
     def encode_request(state:, reflexes: [])
-      LiveComponent::Payload.encode({ "state" => state, "reflexes" => reflexes }.to_json)
+      LiveComponent::Payload.encode_payload({ "state" => state, "reflexes" => reflexes }.to_json)
     end
 
     test "does not stream from any global broadcasting" do
