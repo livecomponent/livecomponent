@@ -1,4 +1,4 @@
-import { Controller } from "@hotwired/stimulus";
+import { Context, Controller } from "@hotwired/stimulus";
 import { LiveComponent, Props, RenderRequest, SlotDefs, State } from "./live-component";
 import { ComponentBuilder } from "./component-builder";
 import { Constructor } from "./constructor";
