@@ -3,7 +3,7 @@ import { createRoot, Root } from "react-dom/client";
 import { live } from "./live";
 import { LiveComponent, RenderRequest, State } from "./live-component";
 import { LiveController } from "./live-controller";
-import { Task } from "queue";
+import { Task } from "./queue";
 
 // Define ComponentType locally to avoid circular import with react
 /* @ts-ignore */
@@ -90,7 +90,8 @@ export class LiveControllerReact extends LiveController {
 
           if (controller) {
             state.props[key] = (...args: any[]) => {
-              return controller[method_name](...args);
+              /* @ts-ignore */
+              return (controller[method_name])(...args);
             }
           } else {
             throw new Error(`Controller not yet initialized for live component with id '${id}'`);
