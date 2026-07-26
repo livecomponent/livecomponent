@@ -49,8 +49,8 @@ end
 
 LiveComponent.register_prop_serializer(:model_serializer, LiveComponent::ModelSerializer)
 
-if defined?(Rails)
+if defined?(Rails::Engine)
   require "live_component/engine"
 end
 
-require File.join(File.dirname(__dir__), "ext", "view_component_patch")
+require File.join("live_component", "view_component_patch")
