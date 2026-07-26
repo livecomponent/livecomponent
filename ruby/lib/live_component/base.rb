@@ -85,7 +85,7 @@ module LiveComponent
 
       # For collections
       def __vc_initialize_parameters
-        @__vc_initialize_parameters ||= instance_method(:initialize).super_method.parameters
+        __lc_init_args
       end
 
       def __lc_controller
