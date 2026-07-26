@@ -2,7 +2,7 @@ import { WebSocketsTransport } from "./websockets-transport";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { RenderRequest } from "./live-component";
 import type { Consumer, Subscription } from "@rails/actioncable";
-import { encode, encode_request } from "./payload";
+import { encode_payload, encode_request } from "./payload";
 
 describe("WebSocketsTransport", () => {
   let transport: WebSocketsTransport;
@@ -106,7 +106,7 @@ describe("WebSocketsTransport", () => {
 
       // Simulate the server response
       const mock_response_body = "<div>Rendered HTML</div>";
-      const encoded_body = await encode(mock_response_body);
+      const encoded_body = await encode_payload(mock_response_body);
       if (received_callback) {
         received_callback({
           request_id: request_id,
@@ -164,8 +164,8 @@ describe("WebSocketsTransport", () => {
       // Encode the responses
       const response1_body = "<div>Response 1</div>";
       const response2_body = "<div>Response 2</div>";
-      const encoded_response1 = await encode(response1_body);
-      const encoded_response2 = await encode(response2_body);
+      const encoded_response1 = await encode_payload(response1_body);
+      const encoded_response2 = await encode_payload(response2_body);
 
       // Respond to request 2 first (out of order)
       if (received_callback) {

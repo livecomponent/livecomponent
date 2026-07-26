@@ -1,7 +1,7 @@
 import { HTTPTransport } from "./http-transport";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { RenderRequest } from "./live-component";
-import { encode, encode_request } from "./payload";
+import { encode_payload, encode_request } from "./payload";
 
 describe("HTTPTransport", () => {
   let transport: HTTPTransport;
@@ -51,7 +51,7 @@ describe("HTTPTransport", () => {
   describe("render", () => {
     it("makes a POST request to the render URL", async () => {
       const mock_response = "<div>Rendered HTML</div>";
-      const encoded_mock_response = await encode(mock_response);
+      const encoded_mock_response = await encode_payload(mock_response);
       const mock_fetch = vi.fn().mockResolvedValue({
         status: 200,
         text: () => Promise.resolve(encoded_mock_response),

@@ -1,4 +1,4 @@
-import { decode, encode_request } from "./payload";
+import { decode_response, encode_request } from "./payload";
 import { Transport } from "./application";
 import { RenderRequest, RenderResponse, ErrorResponseStatus } from "./live-component";
 
@@ -79,7 +79,7 @@ export class HTTPTransport implements Transport {
         status: error_status
       };
     } else {
-      const decoded_body = await decode(body);
+      const decoded_body = await decode_response(body);
 
       return {
         success: true,
