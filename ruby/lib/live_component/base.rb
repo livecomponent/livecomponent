@@ -88,10 +88,33 @@ module LiveComponent
         __lc_init_args
       end
 
+      # Opts the component in to a Stimulus controller name derived from the Ruby
+      # class name, or sets an explicit one.
+      #
+      #   live_controller             # => "my-namespace-mycomponent"
+      #   live_controller "my-header" # => "my-header"
+      #
+      # Explicit names are used verbatim, i.e. they are not validated or
+      # normalized in any way.
+      def live_controller(name = nil)
+        @__lc_controller_declared = true
+        @__lc_controller_name = name if name
+        nil
+      end
+
       def __lc_controller
-        # If there are any sidecar js files, assume one of them defines a controller
-        # named after the Ruby class. Otherwise, use the default LiveController.
-        @__lc_controller ||= __lc_js_sidecar_files.empty? ? "live" : self.name.dasherize.downcase.gsub("::", "-")
+        # Use the explicitly declared controller name if there is one. Otherwise, if
+        # the component opted in via `live_controller` or has any sidecar js files
+        # (in which case we assume one of them defines a controller named after the
+        # Ruby class), derive the name from the class name. Failing that, use the
+        # default LiveController.
+        @__lc_controller ||= if @__lc_controller_name
+          @__lc_controller_name
+        elsif @__lc_controller_declared || __lc_js_sidecar_files.present?
+          self.name.dasherize.downcase.gsub("::", "-")
+        else
+          "live"
+        end
       end
 
       def serializes(prop_name, with: nil, **serializer_options, &block)
@@ -165,17 +188,16 @@ module LiveComponent
 
       private
 
+      # Derived from the resolved controller identifier so the custom element name
+      # always agrees with the one the JavaScript side defines when registering a
+      # controller under the same identifier.
       def __lc_tag_name
-        @__lc_tag_name ||= if self.class.__lc_js_sidecar_files.empty?
+        @__lc_tag_name ||= if __lc_controller == "live"
           "live-component"
+        elsif __lc_controller.include?("-")
+          __lc_controller
         else
-          self.class.name.gsub("::", "-").downcase.yield_self do |name|
-            if name.split("-").size == 1
-              "lc-#{name}"  # custom element names have to be more than one word
-            else
-              name
-            end
-          end
+          "lc-#{__lc_controller}"  # custom element names have to be more than one word
         end
       end
 

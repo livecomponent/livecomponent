@@ -2,7 +2,7 @@ import { Consumer } from "@rails/actioncable";
 import { Transport } from "./application";
 import { LiveRenderChannel } from "./cable";
 import { RenderRequest, RenderResponse } from "./live-component";
-import { decode, encode_request } from "./payload";
+import { decode_response, encode_request } from "./payload";
 
 export class WebSocketsTransport implements Transport {
   public channel: LiveRenderChannel;
@@ -24,7 +24,7 @@ export class WebSocketsTransport implements Transport {
     if (response.success) {
       return {
         ...response,
-        body: await decode(response.body),
+        body: await decode_response(response.body),
       };
     } else {
       return response;

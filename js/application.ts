@@ -1,10 +1,9 @@
-import { TurboSubmitEndEvent, TurboSubmitStartEvent } from "@hotwired/turbo";
+import type { TurboSubmitEndEvent, TurboSubmitStartEvent } from "@hotwired/turbo";
 import { Application as Stimulus, Controller } from "@hotwired/stimulus"
 import { Idiomorph } from "idiomorph";
 import { LiveComponent, RenderRequest, RenderResponse } from "./live-component";
 import { HTTPTransport } from "./http-transport";
 import { LiveController, LiveControllerClass } from "./live-controller";
-import type { LiveOptions } from "live";
 
 const handle_turbo_submit_start = (event: TurboSubmitStartEvent) => {
   const element = find_rerender_target(event.target as HTMLFormElement);
@@ -23,6 +22,8 @@ const handle_turbo_submit_start = (event: TurboSubmitStartEvent) => {
 }
 
 const handle_turbo_submit_end = async (event: TurboSubmitEndEvent) => {
+  if (!event.detail.success) return;
+
   const element = find_rerender_target(event.target as HTMLFormElement);
   if (!element) return;
 
@@ -112,7 +113,7 @@ export class Application {
   }
 
   static register<T extends LiveControllerClass<Controller>>(ruby_class_name: string, constructor: T) {
-    const controller_name = ruby_class_name.replace("::", "-").toLowerCase();
+    const controller_name = ruby_class_name.replaceAll("::", "-").toLowerCase();
     const custom_element_name =
       controller_name.split("-").length === 1 ?
         `lc-${controller_name}` :
