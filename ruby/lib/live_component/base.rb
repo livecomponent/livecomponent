@@ -227,7 +227,7 @@ module LiveComponent
           end
 
           UseContext.provide_context(:__lc_context, { state: current_state }) do
-            super
+            super(view_context, &block)
           end
         end
 
