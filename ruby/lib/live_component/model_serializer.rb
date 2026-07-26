@@ -2,11 +2,14 @@
 
 module LiveComponent
   class ModelSerializer
+    class MalformedGlobalIdError < StandardError; end
+
     MODEL_SERIALIZER_KEY = "_lc_ar".freeze
 
     attr_reader :sign, :reload, :attributes
 
     alias sign? sign
+    alias signed? sign
     alias reload? reload
 
     def self.make(...)
@@ -49,16 +52,15 @@ module LiveComponent
     def deserialize(hash)
       gid_attrs = hash[MODEL_SERIALIZER_KEY]
       gid = gid_attrs["gid"]
-      signed = gid_attrs["signed"]
+      parsed_gid = signed? ? SignedGlobalID.parse(gid) : GlobalID.parse(gid)
+
+      unless parsed_gid
+        raise MalformedGlobalIdError, "Unable to parse #{signed? ? "signed" : "unsigned"} global ID '#{gid}'"
+      end
 
       if reload?
-        if signed
-          GlobalID::Locator.locate_signed(gid)
-        else
-          GlobalID::Locator.locate(gid)
-        end
+        parsed_gid.find
       else
-        parsed_gid = signed ? SignedGlobalID.parse(gid) : GlobalID.parse(gid)
         RecordProxy.for(parsed_gid, hash.except("_lc_ar"))
       end
     end

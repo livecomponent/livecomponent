@@ -60,6 +60,21 @@ class ModelSerializerTest < TestCase
     assert_equal("gid://dummy/TodoList/#{record.id}", hash.dig("_lc_ar", "gid"))
   end
 
+  test "disallows bypassing signature on deserialization" do
+    record = TodoList.create(name: "Groceries")
+    secret_record = TodoList.create(name: "I'm secret")
+    serializer = LiveComponent::ModelSerializer.new(sign: true)
+    hash = serializer.serialize(record)
+
+    hash["_lc_ar"]["gid"] = "gid://dummy/TodoList/#{secret_record.id}"
+
+    error = assert_raises(::LiveComponent::ModelSerializer::MalformedGlobalIdError) do
+      serializer.deserialize(hash)
+    end
+
+    assert_equal(error.message, "Unable to parse signed global ID 'gid://dummy/TodoList/#{secret_record.id}'")
+  end
+
   test "deserializing does not load the record by default" do
     record = TodoList.create(name: "Groceries")
     serializer = LiveComponent::ModelSerializer.new(sign: false)
