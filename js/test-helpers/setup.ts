@@ -1,4 +1,4 @@
-import { LiveComponent, RenderRequest, State } from "../live-component";
+import { LiveComponent, RenderRequest, State, SuccessResponse } from "../live-component";
 import { LiveController } from "../live-controller";
 import { Application as LiveComponentApplication, Transport } from "../application";
 import { Application as StimulusApplication } from "@hotwired/stimulus";
@@ -75,7 +75,7 @@ export class TestComponentWrapper {
       </live-component>
     `;
 
-    const mockResponse = {
+    const mockResponse: SuccessResponse = {
       success: true,
       body: mockResponseBody,
     };
@@ -100,7 +100,7 @@ export class TestComponentWrapper {
   }
 
   get state(): State {
-    return this.component._controller.state;
+    return this.component._controller!.state;
   }
 
   querySelector(...props: Parameters<HTMLElement["querySelector"]>): ReturnType<HTMLElement["querySelector"]> {

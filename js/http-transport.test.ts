@@ -11,7 +11,7 @@ describe("HTTPTransport", () => {
   });
 
   const mock_ok_fetch = async (body: string = "<div>Rendered HTML</div>") => {
-    const encoded = await encode(body);
+    const encoded = await encode_payload(body);
 
     return vi.fn().mockResolvedValue({
       status: 200,
