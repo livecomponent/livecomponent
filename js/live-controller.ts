@@ -5,6 +5,7 @@ import { Constructor } from "./constructor";
 import { AsyncTaskQueue, Task, TaskOptions } from "./queue";
 import { live } from "./live";
 
+/* @ts-ignore Whattt the hell */
 type RenderBlock<P, SL extends SlotDefs> = (component: ComponentBuilder<State<P>, P, SL>) => void;
 
 export type LiveControllerClass<T extends Controller> = {
@@ -20,7 +21,24 @@ export class LiveController<P extends Props = Props, SL extends SlotDefs = SlotD
   public state: State<P>;
   private _task_queue: AsyncTaskQueue<void> | null = null;
 
-  get ruby_class(): string {
+  constructor(context: Context) {
+    super(context);
+
+    // avoid having to remember to call super in derived classes
+    const this_init = this.initialize;
+    this.initialize = function() {
+      (this.element as LiveComponent<P, SL>).set_controller(this);
+      if (this_init) this_init();
+    }
+
+    const this_connect = this.connect;
+    this.connect = function() {
+      this.propagate_state_from_element();
+      if (this_connect) this_connect();
+    }
+  }
+
+  get ruby_class(): string | undefined {
     return this.state.ruby_class;
   }
 
@@ -59,15 +77,7 @@ export class LiveController<P extends Props = Props, SL extends SlotDefs = SlotD
   }
 
   get id(): string {
-    return this.element.getAttribute("data-id");
-  }
-
-  initialize() {
-    (this.element as LiveComponent<P, SL>).set_controller(this);
-  }
-
-  connect() {
-    this.propagate_state_from_element();
+    return this.element.getAttribute("data-id")!;
   }
 
   propagate_state_from_element() {
