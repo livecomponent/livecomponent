@@ -7,7 +7,7 @@ import { live } from "./live";
 
 type RenderBlock<P, SL extends SlotDefs> = (component: ComponentBuilder<State<P>, P, SL>) => void;
 
-export type LiveControllerClass<T> = {
+export type LiveControllerClass<T extends Controller> = {
   identifier: string
   targets: string[]
 } & Constructor<T>
@@ -16,6 +16,7 @@ export type LiveControllerClass<T> = {
 export class LiveController<P extends Props = Props, SL extends SlotDefs = SlotDefs> extends Controller {
   static identifier: string;
 
+  /* @ts-ignore */
   public state: State<P>;
   private _task_queue: AsyncTaskQueue<void> | null = null;
 
@@ -71,7 +72,7 @@ export class LiveController<P extends Props = Props, SL extends SlotDefs = SlotD
 
   propagate_state_from_element() {
     if (this.element.hasAttribute("data-state")) {
-      const state = JSON.parse(this.element.getAttribute("data-state")) as State<P>;
+      const state = JSON.parse(this.element.getAttribute("data-state")!) as State<P>;
       this.propagate_state(state);
       this.element.removeAttribute("data-state");
     }
@@ -90,6 +91,7 @@ export class LiveController<P extends Props = Props, SL extends SlotDefs = SlotD
 
           /* @ts-ignore idk how to fix this */
           state.props[key] = (...args: any[]) => {
+            /* @ts-ignore */
             return controller[method_name](...args);
           }
         } else {
@@ -129,10 +131,10 @@ export class LiveController<P extends Props = Props, SL extends SlotDefs = SlotD
     this.after_update();
   }
 
-  render(options?: TaskOptions)
-  render(options?: TaskOptions, cb?: RenderBlock<P, SL>)
+  render(options?: TaskOptions): Task<void>
+  render(options?: TaskOptions, cb?: RenderBlock<P, SL>): Task<void>
   render(cb?: RenderBlock<P, SL>): Task<void>
-  render(arg1?: TaskOptions | RenderBlock<P, SL>, arg2?: RenderBlock<P, SL>) {
+  render(arg1?: TaskOptions | RenderBlock<P, SL>, arg2?: RenderBlock<P, SL>): Task<void> {
     let cb: RenderBlock<P, SL> | undefined = undefined;
     let options: TaskOptions | undefined = undefined;
 
@@ -172,7 +174,7 @@ export class LiveController<P extends Props = Props, SL extends SlotDefs = SlotD
   }
 
   find_closest<T extends LiveController>(controller: LiveControllerClass<T>, element: Element = this.element): T | null {
-    let current = element;
+    let current: Element | null = element;
 
     while (current) {
       const child_controller = this.application.getControllerForElementAndIdentifier(current, controller.identifier) as T;

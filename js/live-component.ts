@@ -31,7 +31,9 @@ export class LiveComponent<P extends Props = Props, SL extends SlotDefs = SlotDe
   // non-async way of getting the controller; shold only be used by event handlers
   // and such that cannot be async
   public _controller: LiveController<P, SL> | null = null;
-  private resolve_controller: (controller: LiveController<P, SL>) => void;
+
+  // assigned async in the constructor
+  private resolve_controller!: (controller: LiveController<P, SL>) => void;
 
   constructor() {
     super();
@@ -53,7 +55,7 @@ export class LiveComponent<P extends Props = Props, SL extends SlotDefs = SlotDe
 
   get parent(): LiveComponent | null {
     const parent_el = this.parentElement;
-    return parent_el?.closest("[data-livecomponent]");
+    return parent_el?.closest("[data-livecomponent]") ?? null;
   }
 
   async render(request: RenderRequest, task?: Task<any>) {
@@ -75,7 +77,7 @@ export class LiveComponent<P extends Props = Props, SL extends SlotDefs = SlotDe
     const el = document.createElement("div");
     el.innerHTML = (response as SuccessResponse).body;
     const first_child = el.querySelector("[data-livecomponent]") as LiveComponent;
-    const new_state = JSON.parse(first_child.getAttribute("data-state"));
+    const new_state = JSON.parse(first_child.getAttribute("data-state") ?? "{}");
     first_child.removeAttribute("data-state");
 
     Idiomorph.morph(this, first_child, {
@@ -122,7 +124,7 @@ export type ErrorResponse = {
   success: false
   status: ErrorResponseStatus | "unknown"
   body: string
-  message?: string
+  message: string | null
   backtrace?: string[]
 }
 

@@ -4,24 +4,7 @@ import { Idiomorph } from "idiomorph";
 import { LiveComponent, RenderRequest, RenderResponse } from "./live-component";
 import { HTTPTransport } from "./http-transport";
 import { LiveController, LiveControllerClass } from "./live-controller";
-
-interface TurboSubmitStartEvent extends CustomEvent {
-  detail: {
-    formSubmission: {
-      body: FormData;
-    };
-  };
-  target: EventTarget | null;
-}
-
-interface TurboSubmitEndEvent extends CustomEvent {
-  detail: {
-    fetchResponse: {
-      responseHTML: Promise<string>;
-    };
-  };
-  target: EventTarget | null;
-}
+import type { LiveOptions } from "live";
 
 const handle_turbo_submit_start = (event: TurboSubmitStartEvent) => {
   const element = find_rerender_target(event.target as HTMLFormElement);
@@ -41,12 +24,16 @@ const handle_turbo_submit_start = (event: TurboSubmitStartEvent) => {
 
 const handle_turbo_submit_end = async (event: TurboSubmitEndEvent) => {
   const element = find_rerender_target(event.target as HTMLFormElement);
-  const response = await event.detail.fetchResponse.responseHTML;
+  if (!element) return;
+
+  const response = await event.detail.fetchResponse;
+  if (!response) return;
 
   // strip away the turbo-frame and template tags
   const dummy_element = document.createElement("div");
-  dummy_element.innerHTML = response;
-  const html = dummy_element.querySelector("template").innerHTML;
+  dummy_element.innerHTML = await response.responseHTML;
+
+  const html = dummy_element.querySelector("template")!.innerHTML;
   const el = document.createElement("div");
   el.innerHTML = html;
 

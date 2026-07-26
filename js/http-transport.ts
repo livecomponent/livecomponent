@@ -16,7 +16,7 @@ export class HTTPTransport implements Transport {
   async render(request: RenderRequest): Promise<RenderResponse> {
     try {
       return this.render_request(request);
-    } catch (e) {
+    } catch (e: any) {
       return {
         success: false,
         body: e.stack,
