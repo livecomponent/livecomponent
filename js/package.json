@@ -6,21 +6,26 @@
   "files": [
     "dist"
   ],
-  "main": "./dist/live-component.umd.cjs",
+  "main": "./dist/live-component.cjs",
   "module": "./dist/live-component.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": {
-        "default": "./dist/live-component.js"
-      },
-      "require": "./dist/live-component.umd.cjs"
+      "import": "./dist/live-component.js",
+      "require": "./dist/live-component.cjs"
+    },
+    "./react": {
+      "types": "./dist/react.d.ts",
+      "import": "./dist/react.js",
+      "require": "./dist/react.cjs"
     }
   },
   "scripts": {
     "test": "vitest",
-    "build": "vite build"
+    "build": "vite build",
+    "check:dist-types": "tsc -p smoke/tsconfig.json && node smoke/check-dist.mjs",
+    "prepack": "npm run build && npm run check:dist-types"
   },
   "repository": {
     "type": "git",
@@ -55,14 +60,24 @@
     "@types/react": "^19.1",
     "@types/react-dom": "^19.1",
     "happy-dom": "^20.0.10",
+    "react": "^19.1",
+    "react-dom": "^19.1",
     "terser": "^5.44.0",
+    "typescript": "^5.9.3",
     "vite-plugin-dts": "^4.5.4",
     "vitest": "^3.2.4"
   },
   "peerDependencies": {
     "@hotwired/stimulus": "^3.2",
-    "@vitejs/plugin-react": "^5.0",
     "react": "^19.1",
     "react-dom": "^19.1"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    },
+    "react-dom": {
+      "optional": true
+    }
   }
 }
