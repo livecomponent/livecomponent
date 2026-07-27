@@ -3,49 +3,49 @@
 require "json"
 
 module LiveComponent
+  # Transport adapter for HTTP. Owns the rack envelope; the Renderer
+  # owns everything between decode and encode.
   class Middleware
     def initialize(app)
       @app = app
     end
 
     def call(env)
-      if env["PATH_INFO"] == "/live_component/render"
+      return @app.call(env) unless env["PATH_INFO"] == "/live_component/render"
+
+      result =
         begin
-          render_response(env)
-        rescue Exception => e
-          error_response(e)
+          data = JSON.parse(env["rack.input"].read)
+          Renderer.render(data["payload"])
+        rescue StandardError => e
+          Renderer::Failure.new(
+            message: e.message, error_class: e.class.name, backtrace: e.backtrace || []
+          )
         end
-      else
-        @app.call(env)
+
+      case result
+      in Renderer::Success(payload:)
+        [200, { "Content-Type" => "text/html" }, [payload]]
+      in Renderer::Failure
+        error_response(result)
       end
     end
 
     private
 
-    def render_response(env)
-      raw_data = env["rack.input"].read
-      data = JSON.parse(raw_data)
-      payload, compressed = LiveComponent::Payload.decode_request(data["payload"])
+    def error_response(failure)
+      message = "#{failure.message} (#{failure.error_class})"
 
-      result = LiveComponent::RenderController.renderer.render(
-        :show, assigns: { state: payload["state"], reflexes: payload["reflexes"] }, layout: false
-      )
 
-      result = LiveComponent::Payload.encode_response(result, compress: compressed)
-
-      [200, { "Content-Type" => "text/html" }, [result]]
-    end
-
-    def error_response(e)
       body = <<~HTML
-        #{e.message} (#{e.class.name})<br>
-        #{e.backtrace.join("<br>")}
+        #{message}<br>
+        #{failure.backtrace.join("<br>")}
       HTML
 
       headers = {
         "Content-Type" => "text/html",
-        "X-Live-Error-Message" => "#{e.message} (#{e.class.name})",
-        "X-Live-Error-Backtrace-Json" => e.backtrace.to_json,
+        "X-Live-Error-Message" => message,
+        "X-Live-Error-Backtrace-Json" => failure.backtrace.to_json,
       }
 
       [500, headers, [body]]

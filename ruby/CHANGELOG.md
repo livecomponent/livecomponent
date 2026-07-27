@@ -1,3 +1,11 @@
+# Unreleased
+* Added `LiveComponent::Renderer` as the single render entry point behind both transports.
+* Middleware and `LiveComponentChannel` are now thin transport adapters; errors rescue `StandardError` instead of `Exception`.
+* ActionCable responses are transmitted only to the requesting connection instead of broadcast to all subscribers.
+* Removed the unused `post /render` route, `RenderController#show`, and `show.html.erb`.
+* Error messages now report the raising exception's class (e.g. `RuntimeError`) instead of the `ActionView::Template::Error` wrapper.
+* Cable error responses always include a `backtrace` array (previously could be `null`).
+
 # 0.4.0
 * See js/CHANGELOG.md.
 
