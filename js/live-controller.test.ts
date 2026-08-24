@@ -190,6 +190,34 @@ describe("LiveController", () => {
       expect((caught as Error).message).toBe("boom");
       expect(document.querySelector(".lc-error-dialog")).not.toBeNull();
     });
+
+    it("dispatches livecomponent:error with a client-error response when a queued render throws", async () => {
+      const component = await testContext.make_component();
+      const controller = await component.controller;
+
+      const events: CustomEvent[] = [];
+      component.component.addEventListener("livecomponent:error", (e: Event) => {
+        e.preventDefault();
+        events.push(e as CustomEvent);
+      });
+
+      const task = controller.render(() => {
+        throw new Error("boom");
+      });
+
+      await task.catch(() => {});
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(events).toHaveLength(1);
+      expect(events[0].target).toBe(component.component);
+      expect(events[0].detail).toMatchObject({
+        success: false,
+        status: "client-error",
+        message: "boom",
+      });
+      expect(Array.isArray(events[0].detail.backtrace)).toBe(true);
+      expect(document.querySelector(".lc-error-dialog")).toBeNull();
+    });
   });
 
   describe("find_closest", () => {

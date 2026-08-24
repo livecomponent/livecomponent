@@ -1,3 +1,8 @@
+# 0.5.0
+* Render failures now dispatch a cancelable, bubbling `livecomponent:error` `CustomEvent` (`detail` is the `ErrorResponse`) on the component element. The built-in error dialog is the default action and is skipped when a listener calls `preventDefault()`, so apps can surface errors their own way, per component or via a `document`-level listener.
+* Fix `HTTPTransport#render` not awaiting `render_request`, so transport failures resolve to a client-error response instead of rejecting.
+* Queued render failures no longer surface as unhandled promise rejections.
+
 # 0.4.0
 * Allow renders (tasks) to be canceled.
 * Allow renders (tasks) to be preempted. Preempted tasks cause existing tasks to be dequeued and canceled.

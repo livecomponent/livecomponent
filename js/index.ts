@@ -1,5 +1,6 @@
 export * from "./application";
 export * from "./cable";
+export { ERROR_EVENT_NAME, type LiveComponentErrorEvent } from "./error";
 export * from "./http-transport";
 export * from "./live";
 export * from "./live-component";

@@ -3,7 +3,7 @@ import { ComponentBuilder } from "./component-builder";
 import { LiveController } from "./live-controller";
 import { Application } from "./application";
 import { Task } from "./queue";
-import { show_error_dialog } from "./error-dialog";
+import { report_error } from "./error";
 
 export type Props<T = {[key: string]: any}> = T;
 export type SlotDefs = Record<string, Props>;
@@ -66,7 +66,7 @@ export class LiveComponent<P extends Props = Props, SL extends SlotDefs = SlotDe
     if (task?.canceled) return;
 
     if (!response.success) {
-      show_error_dialog(response as ErrorResponse);
+      report_error(this, response as ErrorResponse);
       return;
     }
 
