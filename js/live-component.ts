@@ -3,7 +3,7 @@ import { ComponentBuilder } from "./component-builder";
 import { LiveController } from "./live-controller";
 import { Application } from "./application";
 import { Task } from "./queue";
-import { render_error_dialog } from "./error-dialog";
+import { report_error } from "./error";
 
 export type Props<T = {[key: string]: any}> = T;
 export type SlotDefs = Record<string, Props>;
@@ -66,11 +66,7 @@ export class LiveComponent<P extends Props = Props, SL extends SlotDefs = SlotDe
     if (task?.canceled) return;
 
     if (!response.success) {
-      const error_dialog_html = render_error_dialog(response as ErrorResponse);
-      const error_dialog = document.createElement("div");
-      error_dialog.innerHTML = error_dialog_html;
-      document.body.appendChild(error_dialog);
-      (error_dialog.querySelector("dialog") as HTMLDialogElement).showModal();
+      report_error(this, response as ErrorResponse);
       return;
     }
 

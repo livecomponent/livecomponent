@@ -71,7 +71,7 @@ if (!window.customElements.get('live-component-react')) {
 @live("LiveReact")
 export class LiveControllerReact extends LiveController {
   render(): Task<void> {
-    return this.task_queue.enqueue(async (task?: Task<void>) => {
+    return this.enqueue_render(async (task?: Task<void>) => {
       await (this.element as LiveComponent).render({ state: this.state, reflexes: [] }, task);
     });
   }

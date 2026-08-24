@@ -106,4 +106,76 @@ describe("LiveComponent", () => {
       expect(div.textContent).toStrictEqual("content");
     });
   });
+
+  describe("render errors", () => {
+    const make_error_response = () => ({
+      success: false as const,
+      status: "server-error" as const,
+      body: "<pre>boom</pre>",
+      message: "boom",
+    });
+
+    it("dispatches a cancelable, bubbling livecomponent:error event on the component", async () => {
+      const wrapper = await testContext.make_component();
+      const response = make_error_response();
+      vi.mocked(testContext.transport.render).mockResolvedValue(response);
+
+      const events: CustomEvent[] = [];
+      wrapper.component.addEventListener("livecomponent:error", (e: Event) => {
+        e.preventDefault();
+        events.push(e as CustomEvent);
+      });
+
+      await wrapper.component.render(testContext.make_request());
+
+      expect(events).toHaveLength(1);
+      expect(events[0].detail).toBe(response);
+      expect(events[0].bubbles).toBe(true);
+      expect(events[0].cancelable).toBe(true);
+      expect(events[0].target).toBe(wrapper.component);
+    });
+
+    it("bubbles the livecomponent:error event up to document", async () => {
+      const wrapper = await testContext.make_component();
+      const response = make_error_response();
+      vi.mocked(testContext.transport.render).mockResolvedValue(response);
+
+      const events: CustomEvent[] = [];
+      const listener = (e: Event) => {
+        e.preventDefault();
+        events.push(e as CustomEvent);
+      };
+      document.addEventListener("livecomponent:error", listener);
+
+      try {
+        await wrapper.component.render(testContext.make_request());
+      } finally {
+        document.removeEventListener("livecomponent:error", listener);
+      }
+
+      expect(events).toHaveLength(1);
+      expect(events[0].detail).toBe(response);
+      expect(events[0].target).toBe(wrapper.component);
+    });
+
+    it("shows the error dialog when no listener prevents the default", async () => {
+      const wrapper = await testContext.make_component();
+      vi.mocked(testContext.transport.render).mockResolvedValue(make_error_response());
+
+      await wrapper.component.render(testContext.make_request());
+
+      expect(document.querySelector(".lc-error-dialog")).not.toBeNull();
+    });
+
+    it("skips the error dialog when a listener calls preventDefault()", async () => {
+      const wrapper = await testContext.make_component();
+      vi.mocked(testContext.transport.render).mockResolvedValue(make_error_response());
+
+      wrapper.component.addEventListener("livecomponent:error", (e: Event) => e.preventDefault());
+
+      await wrapper.component.render(testContext.make_request());
+
+      expect(document.querySelector(".lc-error-dialog")).toBeNull();
+    });
+  });
 });
