@@ -4,6 +4,7 @@ import { Idiomorph } from "idiomorph";
 import { LiveComponent, RenderRequest, RenderResponse } from "./live-component";
 import { HTTPTransport } from "./http-transport";
 import { LiveController, LiveControllerClass } from "./live-controller";
+import { set_error_dialog_enabled } from "./error";
 
 const handle_turbo_submit_start = (event: TurboSubmitStartEvent) => {
   const element = find_rerender_target(event.target as HTMLFormElement);
@@ -76,6 +77,12 @@ export interface Transport {
   render(request: RenderRequest): Promise<RenderResponse>;
 }
 
+export interface ApplicationOptions {
+  // Show the built-in error dialog for unhandled render failures. Defaults to
+  // false in production builds, where failures go to console.error instead.
+  error_dialog?: boolean;
+}
+
 export class Application {
   private static application: Application;
   private static application_promise: Promise<Application>;
@@ -91,9 +98,13 @@ export class Application {
     return this.application_promise;
   }
 
-  static start(stimulus: Stimulus, transport?: Transport) {
+  static start(stimulus: Stimulus, transport?: Transport, options: ApplicationOptions = {}) {
     if (this.application) {
       return this.application;
+    }
+
+    if (options.error_dialog !== undefined) {
+      set_error_dialog_enabled(options.error_dialog);
     }
 
     if (!this.resolve_application) {
