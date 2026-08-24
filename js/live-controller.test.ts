@@ -153,6 +153,73 @@ describe("LiveController", () => {
     });
   });
 
+  describe("render", () => {
+    it("does not produce an unhandled rejection and shows the error dialog when a queued render throws", async () => {
+      const component = await testContext.make_component(null, () => {
+        return "<div attribute='original value'>original content</div>";
+      });
+
+      const controller = await component.controller;
+
+      const unhandled_rejections: unknown[] = [];
+      const on_unhandled_rejection = (reason: unknown) => {
+        unhandled_rejections.push(reason);
+      };
+
+      process.on("unhandledRejection", on_unhandled_rejection);
+
+      const task = controller.render(() => {
+        throw new Error("boom");
+      });
+
+      // The internal catch must not swallow the rejection for callers that do
+      // attach their own handlers.
+      let caught: unknown;
+      task.catch((err: unknown) => {
+        caught = err;
+      });
+
+      // Node only emits "unhandledRejection" once the microtask queue drains at
+      // the end of the current turn, so yield a macrotask before asserting.
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      process.off("unhandledRejection", on_unhandled_rejection);
+
+      expect(unhandled_rejections).toStrictEqual([]);
+      expect(caught).toBeInstanceOf(Error);
+      expect((caught as Error).message).toBe("boom");
+      expect(document.querySelector(".lc-error-dialog")).not.toBeNull();
+    });
+
+    it("dispatches livecomponent:error with a client-error response when a queued render throws", async () => {
+      const component = await testContext.make_component();
+      const controller = await component.controller;
+
+      const events: CustomEvent[] = [];
+      component.component.addEventListener("livecomponent:error", (e: Event) => {
+        e.preventDefault();
+        events.push(e as CustomEvent);
+      });
+
+      const task = controller.render(() => {
+        throw new Error("boom");
+      });
+
+      await task.catch(() => {});
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(events).toHaveLength(1);
+      expect(events[0].target).toBe(component.component);
+      expect(events[0].detail).toMatchObject({
+        success: false,
+        status: "client-error",
+        message: "boom",
+      });
+      expect(Array.isArray(events[0].detail.backtrace)).toBe(true);
+      expect(document.querySelector(".lc-error-dialog")).toBeNull();
+    });
+  });
+
   describe("find_closest", () => {
     it("traverses up the DOM searching for the given controller class", async () => {
       const page = document.createElement("div");
