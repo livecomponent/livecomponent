@@ -8,12 +8,22 @@ export const show_error_dialog = (response: ErrorResponse) => {
   (error_dialog.querySelector("dialog") as HTMLDialogElement).showModal();
 }
 
+const HTML_ESCAPES: Record<string, string> = {
+  "&": "&amp;",
+  "<": "&lt;",
+  ">": "&gt;",
+  '"': "&quot;",
+  "'": "&#39;",
+};
+
+const escape_html = (text: string) => text.replace(/[&<>"']/g, (c) => HTML_ESCAPES[c]);
+
 const render_error_dialog = (response: ErrorResponse) => {
-  const message = response.message ?? "An error occurred";
+  const message = escape_html(response.message ?? "An error occurred");
   const show_backtrace_label = Boolean(response.backtrace);
   const body = response.backtrace
-    ? response.backtrace.map(t => `<span class="lc-error-dialog-backtrace-line">${t}</span>`).join("")
-    : response.body;
+    ? response.backtrace.map(t => `<span class="lc-error-dialog-backtrace-line">${escape_html(t)}</span>`).join("")
+    : escape_html(response.body ?? "");
 
   return `
     <div class="lc-error-dialog-wrapper">
