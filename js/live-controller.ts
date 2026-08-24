@@ -2,7 +2,7 @@ import { Context, Controller } from "@hotwired/stimulus";
 import { ErrorResponse, LiveComponent, Props, RenderRequest, SlotDefs, State } from "./live-component";
 import { ComponentBuilder } from "./component-builder";
 import { Constructor } from "./constructor";
-import { AsyncTaskQueue, Task, TaskOptions } from "./queue";
+import { AsyncTaskQueue, Task, TaskFn, TaskOptions } from "./queue";
 import { live } from "./live";
 import { report_error } from "./error";
 
@@ -171,11 +171,15 @@ export class LiveController<P extends Props = Props, SL extends SlotDefs = SlotD
       await (this.element as LiveComponent).render(request, task);
     });
 
+    return this.enqueue_render(task_fn, options);
+  }
+
+  // Callers rarely await the task, so a failing render would otherwise be an
+  // unhandled rejection. Task#catch delegates to the underlying promise, so
+  // callers can still attach their own handlers to the returned task.
+  protected enqueue_render(task_fn: TaskFn<void>, options?: TaskOptions): Task<void> {
     const task = this.task_queue.enqueue(task_fn, options);
 
-    // Callers rarely await the task, so a failing render would otherwise be an
-    // unhandled rejection. Task#catch delegates to the underlying promise, so
-    // callers can still attach their own handlers to the returned task.
     task.catch((err) => {
       const error_response: ErrorResponse = {
         success: false,

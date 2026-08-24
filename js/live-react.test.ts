@@ -1,7 +1,8 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, vi } from "vitest";
 // Import React from node_modules explicitly to avoid confusion with local ./react module
 import * as React from "react";
-import { ReactRegistry, LiveComponentReact } from "./live-react";
+import { Application as StimulusApplication } from "@hotwired/stimulus";
+import { ReactRegistry, LiveComponentReact, LiveControllerReact } from "./live-react";
 import { RenderRequest, State } from "./live-component";
 
 describe("ReactRegistry", () => {
@@ -163,6 +164,70 @@ describe("LiveComponentReact", () => {
 
       expect(oldNode.getAttribute('data-id')).toBeNull();
       expect(result).toBe(false);
+    });
+  });
+});
+
+describe("LiveControllerReact", () => {
+  beforeEach(() => {
+    (ReactRegistry as any)._instance = undefined;
+
+    if (!window.customElements.get('live-component-react')) {
+      window.customElements.define('live-component-react', LiveComponentReact);
+    }
+  });
+
+  describe("render", () => {
+    it("reports a failing queued render via livecomponent:error instead of an unhandled rejection", async () => {
+      ReactRegistry.register_component("Noop", () => null);
+
+      const stimulusApp = StimulusApplication.start();
+      stimulusApp.register("live-react", LiveControllerReact);
+
+      const element = document.createElement("live-component-react") as LiveComponentReact;
+      element.setAttribute("data-livecomponent", "true");
+      element.setAttribute("data-controller", "live-react");
+      element.setAttribute("data-state", JSON.stringify({ props: { component: "Noop" }, slots: {}, children: {} }));
+      document.body.appendChild(element);
+
+      const controller = await element.controller as LiveControllerReact;
+
+      vi.spyOn(element, "render").mockRejectedValue(new Error("boom"));
+
+      const events: CustomEvent[] = [];
+      element.addEventListener("livecomponent:error", (e: Event) => {
+        e.preventDefault();
+        events.push(e as CustomEvent);
+      });
+
+      const unhandled_rejections: unknown[] = [];
+      const on_unhandled_rejection = (reason: unknown) => {
+        unhandled_rejections.push(reason);
+      };
+      process.on("unhandledRejection", on_unhandled_rejection);
+
+      const task = controller.render();
+
+      let caught: unknown;
+      task.catch((err: unknown) => {
+        caught = err;
+      });
+
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      process.off("unhandledRejection", on_unhandled_rejection);
+      stimulusApp.stop();
+      document.body.removeChild(element);
+
+      expect(unhandled_rejections).toStrictEqual([]);
+      expect((caught as Error).message).toBe("boom");
+      expect(events).toHaveLength(1);
+      expect(events[0].target).toBe(element);
+      expect(events[0].detail).toMatchObject({
+        success: false,
+        status: "client-error",
+        message: "boom",
+      });
     });
   });
 });
